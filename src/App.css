@@ -1,11 +1,11 @@
 .page {
-    background-color: lightblue;
-    display: flex;
-    align-items:center;
-    justify-content: center;
-    min-height: 100vh;
-    flex-direction: column;
-  }
+  background-color: lightblue;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  flex-direction: column;
+}
 
 .container {
   display: block !important;
@@ -15,7 +15,9 @@ html {
   box-sizing: border-box;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: inherit;
   padding: 0;
   margin: 0;
@@ -55,3 +57,22 @@ p {
   margin-bottom: 15px;
 }
 
+.overlay {
+  position: absolute;
+  top: 50%; /* Position vertically at the center of the parent container */
+  left: 50%; /* Position horizontally at the center of the parent container */
+  transform: translate(-50%, -50%); /* Center the overlay */
+  width: 290px;
+  height: 775px;
+  background-color: rgb(255, 255, 255); /* Semi-transparent background */
+  z-index: 999; /* Higher z-index to appear on top of other elements */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 10px;
+}
+
+input::placeholder {
+  color: #d3d3d3 !important;
+  opacity: 1; /* Firefox */
+}
