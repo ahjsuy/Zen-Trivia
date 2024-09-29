@@ -37,6 +37,7 @@ const TriviaSettings = ({
   difficulties,
   setCategories,
   setDifficulties,
+  setTimerDuration,
 }: Props) => {
   // everytime the categories/difficulties state is updated, save it to session
 
@@ -65,6 +66,23 @@ const TriviaSettings = ({
       !newDifficulties[difficulty as keyof typeof difficulties];
     setDifficulties(newDifficulties);
     console.log(difficulties);
+  };
+
+  const handleTimerDuration = () => {
+    const duration = document.getElementById(
+      "timerDurationInput"
+    ) as HTMLInputElement | null;
+    if (duration && duration.value) {
+      if (Number(duration.value) < 5) {
+        setTimerDuration(5);
+      } else if (Number(duration.value) > 30) {
+        setTimerDuration(30);
+      } else {
+        setTimerDuration(Number(duration.value));
+      }
+    } else {
+      setTimerDuration(15);
+    }
   };
 
   // render the categories/difficulties checkboxes
@@ -160,14 +178,14 @@ const TriviaSettings = ({
           type="number"
           id="timerDurationInput"
           className="form-control"
-          min="3"
+          min="5"
           max="30"
           placeholder="15"
           style={{ width: "75px" }}
-          // onChange={(document.getElementById('timerDurationInput').value) => }
+          onChange={handleTimerDuration}
         />
         <div id="timerDurationInput" className="form-text">
-          Please input a number between 3 - 30 seconds.
+          Please input a number between 5 - 30 seconds.
         </div>
       </div>
     </div>

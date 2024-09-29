@@ -7,7 +7,7 @@ import Alert from "./components/Alert";
 import { Link, Route, Routes } from "react-router-dom";
 import TriviaSettings from "./pages/TriviaSettings";
 import TriviaGame from "./pages/TriviaGame";
-import Body from "./components/Body";
+// import Body from "./components/Body";
 
 function App() {
   return (

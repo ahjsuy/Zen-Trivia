@@ -1,15 +1,34 @@
 import Question from "../components/Question";
 import AnswerList from "../components/AnswerList";
+import MusicButton from "../components/MusicButton";
 import "../App.css";
 import { useState, useEffect } from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
-import Alert from "../components/Alert";
 import { Link, Route, Routes } from "react-router-dom";
 import TriviaSettings from "./TriviaSettings";
+import ReactHowler from "react-howler";
 
-// todo: add points system, share ?, make correct answer show when the time is up,
-// fix hover over color change, add music? choice to change the time
-// fix the css omg
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyAaJVvLOoBIaASs2_YviKvSuGY0CeR5RR8",
+  authDomain: "trivia-game-zen.firebaseapp.com",
+  projectId: "trivia-game-zen",
+  storageBucket: "trivia-game-zen.appspot.com",
+  messagingSenderId: "1073472332976",
+  appId: "1:1073472332976:web:87e00145e323f5ebdf4775",
+  measurementId: "G-19YJEC7808",
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 // helper function to load checked categories/difficulties per browser
 // session
@@ -28,6 +47,8 @@ function App() {
   const [newQuestion, setNewQuestion] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
   const [timerDuration, setTimerDuration] = useState(15);
+  const [playMusic, setPlayMusic] = useState(1);
+  const [key, setKey] = useState(0);
   const [prev, setPrev] = useState([
     {
       category: "music",
@@ -94,6 +115,7 @@ function App() {
     const fetchProblem = async () => {
       // everytime the newQuestion state is updated
       console.log("IN RENDER");
+
       try {
         let chosenCategories = Object.keys(categories)
           .filter((key) => categories[key])
@@ -128,28 +150,47 @@ function App() {
 
   return (
     <div className="page">
-      {result && <Alert text={correct ? "Correct!" : "Incorrect!"}></Alert>}
-      <div style={{ position: "fixed", top: "10vh" }}>
-        <CountdownCircleTimer
-          isPlaying={showSettings ? false : true}
-          duration={15}
-          colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
-          colorsTime={[15, 10, 5, 0]}
-          size={200}
-          onComplete={() => {
-            setResult(true);
-            setTimeout(() => {
-              setNewQuestion(newQuestion + 1); // rerender newQuestion state so API fetch
-              setResult(false); // stop showing if the selection is correct
-            }, 3000);
-            console.log("COMPLETED");
-            return { shouldRepeat: true, delay: 3 };
-          }}
-        >
-          {({ remainingTime }) => remainingTime}
-        </CountdownCircleTimer>
+      <ReactHowler
+        src="src\assets\sounds\once-in-paris-168895.mp3"
+        playing={playMusic != 0}
+        volume={playMusic / 8}
+        loop={true}
+      />
+      <div style={{ position: "fixed", top: "0", left: "0", padding: "15px" }}>
+        <MusicButton playMusic={playMusic} setPlayMusic={setPlayMusic} />
       </div>
       <div className="container">
+        <div style={{ top: "10vh", color: "white", fontSize: "25px" }}>
+          <CountdownCircleTimer
+            key={key}
+            isPlaying={showSettings ? false : true}
+            duration={timerDuration}
+            colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
+            colorsTime={[
+              timerDuration,
+              timerDuration - timerDuration / 4,
+              timerDuration / 2,
+              0,
+            ]}
+            size={200}
+            strokeWidth={20}
+            trailStrokeWidth={19}
+            onComplete={() => {
+              setResult(true);
+              setTimeout(() => {
+                setNewQuestion(newQuestion + 1); // rerender newQuestion state so API fetch
+                setResult(false); // stop showing if the selection is correct
+                setKey((prev) => prev + 1);
+              }, 3000);
+              console.log("COMPLETED");
+              return { shouldRepeat: true, delay: 3 };
+            }}
+          >
+            {({ remainingTime }) => remainingTime}
+          </CountdownCircleTimer>
+        </div>
+      </div>
+      <div className="container" style={{ color: "white" }}>
         {problem[0].question.text != "string" && ( // parse the API json response to get the question
           <Question question={problem[0].question.text} /> // when the json is no longer the placeholder
         )}
@@ -165,6 +206,7 @@ function App() {
                 problem[0].correctAnswer,
                 ...problem[0].incorrectAnswers,
               ].sort(() => (problem[0].question.text.length % 5) / 5 - 0.5)}
+              result={result}
               onSelect={handleCorrect}
             ></AnswerList>
           )}
