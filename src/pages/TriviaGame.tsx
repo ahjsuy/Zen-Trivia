@@ -68,16 +68,16 @@ function App() {
     // default placeholder problem for
     {
       // initial render
-      category: "music",
-      id: "5f9f1b9b0e1b9c0017a5f1a5",
-      tags: ["string"],
-      difficulty: "easy",
-      regions: ["string"],
+      category: "",
+      id: "",
+      tags: [""],
+      difficulty: "",
+      regions: [""],
       isNiche: true,
-      question: { text: "string" },
-      correctAnswer: "PLACEHOLDER",
-      incorrectAnswers: ["-1", "-1"],
-      type: "text_choice",
+      question: { text: "" },
+      correctAnswer: "",
+      incorrectAnswers: ["", "", "", ""],
+      type: "",
     },
   ]);
 
@@ -161,37 +161,39 @@ function App() {
       </div>
       <div className="container">
         <div style={{ top: "10vh", color: "white", fontSize: "25px" }}>
-          <CountdownCircleTimer
-            key={key}
-            isPlaying={showSettings ? false : true}
-            duration={timerDuration}
-            colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
-            colorsTime={[
-              timerDuration,
-              timerDuration - timerDuration / 4,
-              timerDuration / 2,
-              0,
-            ]}
-            size={200}
-            strokeWidth={20}
-            trailStrokeWidth={19}
-            onComplete={() => {
-              setResult(true);
-              setTimeout(() => {
-                setNewQuestion(newQuestion + 1); // rerender newQuestion state so API fetch
-                setResult(false); // stop showing if the selection is correct
-                setKey((prev) => prev + 1);
-              }, 3000);
-              console.log("COMPLETED");
-              return { shouldRepeat: true, delay: 3 };
-            }}
-          >
-            {({ remainingTime }) => remainingTime}
-          </CountdownCircleTimer>
+          {problem[0].question.text != "" && (
+            <CountdownCircleTimer
+              key={key}
+              isPlaying={showSettings ? false : true}
+              duration={timerDuration}
+              colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
+              colorsTime={[
+                timerDuration,
+                timerDuration - timerDuration / 4,
+                timerDuration / 2,
+                0,
+              ]}
+              size={200}
+              strokeWidth={20}
+              trailStrokeWidth={19}
+              onComplete={() => {
+                setResult(true);
+                setTimeout(() => {
+                  setNewQuestion(newQuestion + 1); // rerender newQuestion state so API fetch
+                  setResult(false); // stop showing if the selection is correct
+                  setKey((prev) => prev + 1);
+                }, 3000);
+                console.log("COMPLETED");
+                return { shouldRepeat: true, delay: 3 };
+              }}
+            >
+              {({ remainingTime }) => remainingTime}
+            </CountdownCircleTimer>
+          )}
         </div>
       </div>
       <div className="container" style={{ color: "white" }}>
-        {problem[0].question.text != "string" && ( // parse the API json response to get the question
+        {problem[0].question.text != "" && ( // parse the API json response to get the question
           <Question question={problem[0].question.text} /> // when the json is no longer the placeholder
         )}
       </div>
