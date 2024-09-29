@@ -151,7 +151,7 @@ function App() {
   return (
     <div className="page">
       <ReactHowler
-        src="src\assets\sounds\once-in-paris-168895.mp3"
+        src="public\sounds\once-in-paris-168895.mp3"
         playing={playMusic != 0}
         volume={playMusic / 8}
         loop={true}

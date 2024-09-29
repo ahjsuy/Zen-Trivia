@@ -70,7 +70,7 @@ const AnswerList = ({
   return (
     <div>
       <ReactHowler
-        src="src\assets\sounds\correct-choice-43861.mp3"
+        src="public\sounds\correct-choice-43861.mp3"
         playing={correctFX}
         onEnd={() => {
           setCorrectFX(false);
@@ -78,7 +78,7 @@ const AnswerList = ({
         volume={0.375}
       />
       <ReactHowler
-        src="src/assets/sounds/wrong-47985.mp3"
+        src="public\sounds\wrong-47985.mp3"
         playing={incorrectFX}
         onEnd={() => {
           setIncorrectFX(false);
