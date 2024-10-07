@@ -159,14 +159,14 @@ function App() {
       <div style={{ position: "fixed", top: "0", left: "0", padding: "15px" }}>
         <MusicButton playMusic={playMusic} setPlayMusic={setPlayMusic} />
       </div>
-      <div className="container">
+      <div className="container oswald-default">
         <div style={{ top: "10vh", color: "white", fontSize: "25px" }}>
           {problem[0].question.text != "" && (
             <CountdownCircleTimer
               key={key}
               isPlaying={showSettings ? false : true}
               duration={timerDuration}
-              colors={["#004777", "#F7B801", "#A30000", "#A30000"]}
+              colors={["#004777", "#F7B801", "#FFA500", "#A30000"]}
               colorsTime={[
                 timerDuration,
                 timerDuration - timerDuration / 4,
@@ -192,12 +192,12 @@ function App() {
           )}
         </div>
       </div>
-      <div className="container" style={{ color: "white" }}>
+      <div className="container oswald-default" style={{ color: "white" }}>
         {problem[0].question.text != "" && ( // parse the API json response to get the question
           <Question question={problem[0].question.text} /> // when the json is no longer the placeholder
         )}
       </div>
-      <div className="container">
+      <div className="container roboto-slab-default">
         {problem != prev && // when the json renders, pass the props to answer
           problem[0].correctAnswer && // list component
           problem[0].incorrectAnswers && (
@@ -241,7 +241,7 @@ function App() {
       </div>
       <button
         type="button"
-        className="btn btn-light"
+        className="btn btn-light roboto-slab-default"
         style={{ position: "fixed", right: "5vh", bottom: "5vh" }}
         onClick={() => {
           setShowSettings(!showSettings);

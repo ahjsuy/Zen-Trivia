@@ -1,5 +1,5 @@
 .page {
-  background-color: #333333;
+  background-color: #3e5f8a;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -82,4 +82,28 @@ p {
 input::placeholder {
   color: #d3d3d3 !important;
   opacity: 1; /* Firefox */
+}
+
+/* // <uniquifier>: Use a unique and descriptive class name
+// <weight>: Use a value from 200 to 700 */
+
+.oswald-default {
+  font-family: "Oswald", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.montserrat-default {
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
+
+.roboto-slab-default {
+  font-family: "Roboto Slab", serif !important;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
 }
