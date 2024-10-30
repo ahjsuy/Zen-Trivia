@@ -18,8 +18,12 @@
   max-width: 105%; */
   /* margin-bottom: 30px; */
 }
-html {
-  box-sizing: border-box;
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
 }
 
 *,
@@ -66,23 +70,23 @@ p {
 
 .overlay {
   position: absolute;
-  top: 50%; /* Position vertically at the center of the parent container */
-  left: 50%; /* Position horizontally at the center of the parent container */
-  transform: translate(-50%, -50%); /* Center the overlay */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 290px;
-  height: 775px;
-  background-color: rgb(255, 255, 255); /* Semi-transparent background */
-  z-index: 999; /* Higher z-index to appear on top of other elements */
+  height: 95vh;
+  background-color: rgb(255, 255, 255);
+  z-index: 999;
   display: flex;
   justify-content: center;
   align-items: center;
   border-radius: 10px;
 }
 
-input::placeholder {
+/* input::placeholder {
   color: #d3d3d3 !important;
-  opacity: 1; /* Firefox */
-}
+  opacity: 1;
+} */
 
 /* // <uniquifier>: Use a unique and descriptive class name
 // <weight>: Use a value from 200 to 700 */
@@ -106,4 +110,37 @@ input::placeholder {
   font-optical-sizing: auto;
   font-weight: 400;
   font-style: normal;
+}
+
+.grad {
+  background-color: #3e5f8a; /* For browsers that do not support gradients */
+  background: linear-gradient(
+    rgba(62, 95, 138, 1) 0%,
+    rgba(64, 110, 170, 1) 40%,
+    rgba(187, 196, 198, 1) 100%
+  );
+  min-height: 100vh;
+  min-width: 100vh;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.card {
+  background-color: white;
+}
+
+.card:hover {
+  background-color: #a4c8e1;
+  cursor: pointer;
 }

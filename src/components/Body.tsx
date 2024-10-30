@@ -1,6 +1,6 @@
 import { Link, Route, Routes } from "react-router-dom";
-import TriviaGame from "../pages/TriviaGame";
-import TriviaSettings from "../pages/TriviaSettings";
+import TriviaGame from "./TriviaGame";
+import TriviaSettings from "./TriviaSettings";
 import Home from "../pages/Home";
 
 function Body() {

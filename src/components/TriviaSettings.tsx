@@ -30,6 +30,7 @@ interface Props {
   setCategories: (category: object) => void;
   setDifficulties: (difficulty: object) => void;
   setTimerDuration: (timerDuration: number) => void;
+  setShowSettings: (showSettings: boolean) => void;
 }
 
 const TriviaSettings = ({
@@ -38,6 +39,7 @@ const TriviaSettings = ({
   setCategories,
   setDifficulties,
   setTimerDuration,
+  setShowSettings,
 }: Props) => {
   // everytime the categories/difficulties state is updated, save it to session
 
@@ -85,10 +87,36 @@ const TriviaSettings = ({
     }
   };
 
+  const handleShowSettings = () => {
+    setShowSettings(false);
+  };
+
   // render the categories/difficulties checkboxes
   return (
-    <div>
-      <div style={{ padding: "20px" }}>
+    <div className="overlay flex-column" style={{ textAlign: "left" }}>
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          flexDirection: "row-reverse",
+          position: "relative",
+          top: "15px",
+          right: "15px",
+        }}
+      >
+        <button
+          style={{ borderStyle: "hidden", backgroundColor: "white" }}
+          onClick={handleShowSettings}
+        >
+          <span
+            className="material-symbols-outlined"
+            style={{ color: "gray", fontSize: "32px" }}
+          >
+            close
+          </span>
+        </button>
+      </div>
+      <div style={{ padding: "20px", paddingTop: "0px", width: "100%" }}>
         <h2>Categories</h2>
         <Checkbox
           handleCheckboxChange={handleCategory}
@@ -151,7 +179,7 @@ const TriviaSettings = ({
           isChecked={categories["general_knowledge"]}
         />
       </div>
-      <div style={{ padding: "20px" }}>
+      <div style={{ padding: "20px", width: "100%" }}>
         <h2>Difficulties</h2>
         <Checkbox
           handleCheckboxChange={handleDifficulty}
@@ -173,7 +201,7 @@ const TriviaSettings = ({
         />
       </div>
       <div style={{ padding: "20px" }}>
-        <h2>Set Timer Duration</h2>
+        <h2>Timer Duration</h2>
         <input
           type="number"
           id="timerDurationInput"

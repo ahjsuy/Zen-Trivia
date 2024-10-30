@@ -1,37 +1,20 @@
-import Question from "../components/Question";
-import AnswerList from "../components/AnswerList";
-import MusicButton from "../components/MusicButton";
+import Question from "./Question";
+import AnswerList from "./AnswerList";
+import MusicButton from "./MusicButton";
 import "../App.css";
 import { useState, useEffect } from "react";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
-import { Link, Route, Routes } from "react-router-dom";
 import TriviaSettings from "./TriviaSettings";
 import ReactHowler from "react-howler";
-
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyAaJVvLOoBIaASs2_YviKvSuGY0CeR5RR8",
-  authDomain: "trivia-game-zen.firebaseapp.com",
-  projectId: "trivia-game-zen",
-  storageBucket: "trivia-game-zen.appspot.com",
-  messagingSenderId: "1073472332976",
-  appId: "1:1073472332976:web:87e00145e323f5ebdf4775",
-  measurementId: "G-19YJEC7808",
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+import { Socket } from "socket.io-client";
 
 // helper function to load checked categories/difficulties per browser
 // session
+
+interface Props {
+  socket: Socket | null;
+  room: string;
+}
 
 const loadFromSessionStorage = (key: string, defaultValue: object) => {
   const storedValues = sessionStorage.getItem(key);
@@ -41,7 +24,22 @@ const loadFromSessionStorage = (key: string, defaultValue: object) => {
   return defaultValue;
 };
 
-function App() {
+type Problem = {
+  category: string;
+  id: string;
+  tags: string[];
+  difficulty: string;
+  regions: string[];
+  isNiche: boolean;
+  question: {
+    text: string;
+  };
+  correctAnswer: string;
+  incorrectAnswers: string[];
+  type: string;
+};
+
+const TriviaGame = ({ socket, room }: Props) => {
   const [correct, setCorrect] = useState(false);
   const [result, setResult] = useState(false);
   const [newQuestion, setNewQuestion] = useState(0);
@@ -64,8 +62,7 @@ function App() {
     },
   ]);
 
-  const [problem, setProblem] = useState([
-    // default placeholder problem for
+  const [problem, setProblem] = useState<Problem[]>([
     {
       // initial render
       category: "",
@@ -111,36 +108,30 @@ function App() {
   };
 
   useEffect(() => {
+    console.log("fetching new question");
+
     // fetch a new problem from the API
     const fetchProblem = async () => {
       // everytime the newQuestion state is updated
-      console.log("IN RENDER");
 
-      try {
-        let chosenCategories = Object.keys(categories)
-          .filter((key) => categories[key])
-          .join(",");
-        let chosenDifficulties = Object.keys(difficulties)
-          .filter((key) => difficulties[key])
-          .join(",");
-        console.log(chosenCategories);
-        console.log(chosenDifficulties);
-        let queryURL = "https://the-trivia-api.com/v2/questions?limit=1";
-        if (chosenDifficulties) {
-          queryURL += "&difficulties=" + chosenDifficulties;
-        }
-        if (chosenCategories) {
-          queryURL += "&categories=" + chosenCategories;
-        }
-        const response = await fetch(queryURL);
-        console.log(response);
-        const triviaResponse = await response.json();
-        setPrev(problem);
-        setProblem(triviaResponse);
-        console.log(triviaResponse);
-        console.log(problem);
-      } catch (error) {
-        console.error("Error fetching problem:", error);
+      let chosenCategories = Object.keys(categories)
+        .filter((key) => categories[key])
+        .join(",");
+      let chosenDifficulties = Object.keys(difficulties)
+        .filter((key) => difficulties[key])
+        .join(",");
+      console.log(chosenCategories);
+      console.log(chosenDifficulties);
+      let queryURL = "https://the-trivia-api.com/v2/questions?limit=1";
+      if (chosenDifficulties) {
+        queryURL += "&difficulties=" + chosenDifficulties;
+      }
+      if (chosenCategories) {
+        queryURL += "&categories=" + chosenCategories;
+      }
+
+      if (socket) {
+        socket.emit("requestNew", queryURL, room);
       }
     };
 
@@ -148,8 +139,31 @@ function App() {
     setCorrect(false);
   }, [newQuestion]);
 
+  useEffect(() => {
+    if (socket) {
+      const handleMessage = (res: Problem[]) => {
+        console.log("got new question!", res);
+        setProblem(res);
+        console.log("SET NEW PROBLEM: ", problem);
+      };
+
+      socket.on("responseQuestion", handleMessage);
+
+      return () => {
+        socket.off("responseQuestion", handleMessage);
+      };
+    }
+  }, [socket]);
+
   return (
-    <div className="page">
+    <div
+      className="grad"
+      style={{
+        alignItems: "center",
+        justifyContent: "center",
+        minHeight: "100vh",
+      }}
+    >
       <ReactHowler
         src="sounds\once-in-paris-168895.mp3"
         playing={playMusic != 0}
@@ -161,41 +175,45 @@ function App() {
       </div>
       <div className="container oswald-default">
         <div style={{ top: "10vh", color: "white", fontSize: "25px" }}>
-          {problem[0].question.text != "" && (
-            <CountdownCircleTimer
-              key={key}
-              isPlaying={showSettings ? false : true}
-              duration={timerDuration}
-              colors={["#004777", "#F7B801", "#FFA500", "#A30000"]}
-              colorsTime={[
-                timerDuration,
-                timerDuration - timerDuration / 4,
-                timerDuration / 2,
-                0,
-              ]}
-              size={200}
-              strokeWidth={20}
-              trailStrokeWidth={19}
-              onComplete={() => {
-                setResult(true);
-                setTimeout(() => {
-                  setNewQuestion(newQuestion + 1); // rerender newQuestion state so API fetch
-                  setResult(false); // stop showing if the selection is correct
-                  setKey((prev) => prev + 1);
-                }, 3000);
-                console.log("COMPLETED");
-                return { shouldRepeat: true, delay: 3 };
-              }}
-            >
-              {({ remainingTime }) => remainingTime}
-            </CountdownCircleTimer>
-          )}
+          {problem[0] &&
+            problem[0].question &&
+            problem[0].question.text != "" && (
+              <CountdownCircleTimer
+                key={key}
+                isPlaying={showSettings ? false : true}
+                duration={timerDuration}
+                colors={["#004777", "#F7B801", "#FFA500", "#A30000"]}
+                colorsTime={[
+                  timerDuration,
+                  timerDuration - timerDuration / 4,
+                  timerDuration / 2,
+                  0,
+                ]}
+                size={200}
+                strokeWidth={20}
+                trailStrokeWidth={19}
+                onComplete={() => {
+                  setResult(true);
+                  setTimeout(() => {
+                    setNewQuestion(newQuestion + 1); // rerender newQuestion state so API fetch
+                    setResult(false); // stop showing if the selection is correct
+                    setKey((prev) => prev + 1);
+                  }, 3000);
+                  console.log("COMPLETED");
+                  return { shouldRepeat: true, delay: 3 };
+                }}
+              >
+                {({ remainingTime }) => remainingTime}
+              </CountdownCircleTimer>
+            )}
         </div>
       </div>
       <div className="container oswald-default" style={{ color: "white" }}>
-        {problem[0].question.text != "" && ( // parse the API json response to get the question
-          <Question question={problem[0].question.text} /> // when the json is no longer the placeholder
-        )}
+        {problem[0] &&
+          problem[0].question &&
+          problem[0].question.text != "" && ( // parse the API json response to get the question
+            <Question question={problem[0].question.text} /> // when the json is no longer the placeholder
+          )}
       </div>
       <div className="container roboto-slab-default">
         {problem != prev && // when the json renders, pass the props to answer
@@ -221,28 +239,28 @@ function App() {
               width: "100%",
               height: "100%",
               backgroundColor: "rgba(0, 0, 0, 0.5)",
+              zIndex: "998",
               display: "flex", // Use flexbox
               justifyContent: "center", // Center horizontally
               alignItems: "center", // Center vertically
             }}
           >
-            <div className="overlay">
-              <TriviaSettings
-                categories={categories}
-                difficulties={difficulties}
-                timerDuration={timerDuration}
-                setCategories={setCategories}
-                setDifficulties={setDifficulties}
-                setTimerDuration={setTimerDuration}
-              />
-            </div>
+            <TriviaSettings
+              categories={categories}
+              difficulties={difficulties}
+              timerDuration={timerDuration}
+              setCategories={setCategories}
+              setDifficulties={setDifficulties}
+              setTimerDuration={setTimerDuration}
+              setShowSettings={setShowSettings}
+            />
           </div>
         )}
       </div>
       <button
         type="button"
         className="btn btn-light roboto-slab-default"
-        style={{ position: "fixed", right: "5vh", bottom: "5vh" }}
+        // style={{ position: "fixed", right: "5vh", bottom: "5vh" }}
         onClick={() => {
           setShowSettings(!showSettings);
         }}
@@ -251,6 +269,6 @@ function App() {
       </button>
     </div>
   );
-}
+};
 
-export default App;
+export default TriviaGame;

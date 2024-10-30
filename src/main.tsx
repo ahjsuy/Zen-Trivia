@@ -3,9 +3,10 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import { BrowserRouter } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.css";
-import Home from "./pages/Home";
-import TriviaGame from "./pages/TriviaGame";
+import Login from "./pages/multiplayer/game/Login";
+import Client from "./pages/multiplayer/game/Client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import SingleClient from "./pages/SingleClient";
 
 const router = createBrowserRouter([
   {
@@ -14,11 +15,15 @@ const router = createBrowserRouter([
   },
   {
     path: "/Home",
-    element: <Home />,
+    element: <Login />,
   },
   {
-    path: "/TriviaGame",
-    element: <TriviaGame />,
+    path: "/SingleClient",
+    element: <SingleClient />,
+  },
+  {
+    path: "/multiplayer/game/Client",
+    element: <Client />,
   },
 ]);
 
