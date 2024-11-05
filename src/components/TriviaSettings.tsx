@@ -1,5 +1,7 @@
 import Checkbox from "../components/Checkbox";
-import { useState, useEffect } from "react";
+import { useState, useEffect, SetStateAction, Dispatch } from "react";
+import { useSocket } from "../SocketContext";
+import { useUser } from "../UserContext";
 
 // helper function to save checked categories/difficulties per browser
 // session
@@ -27,10 +29,28 @@ interface Props {
     hard: boolean;
   };
   timerDuration: number;
-  setCategories: (category: object) => void;
-  setDifficulties: (difficulty: object) => void;
+  setCategories: Dispatch<
+    SetStateAction<{
+      music: boolean;
+      sports_and_leisure: boolean;
+      film_and_tv: boolean;
+      arts_and_literature: boolean;
+      history: boolean;
+      society_and_culture: boolean;
+      science: boolean;
+      geography: boolean;
+      food_and_drink: boolean;
+      general_knowledge: boolean;
+    }>
+  >;
+  setDifficulties: Dispatch<
+    SetStateAction<{ easy: boolean; medium: boolean; hard: boolean }>
+  >;
   setTimerDuration: (timerDuration: number) => void;
   setShowSettings: (showSettings: boolean) => void;
+  pointsToWin?: number;
+  setPointsToWin?: (pointsToWin: number) => void;
+  roomCode?: string;
 }
 
 const TriviaSettings = ({
@@ -38,10 +58,17 @@ const TriviaSettings = ({
   difficulties,
   setCategories,
   setDifficulties,
+  timerDuration,
   setTimerDuration,
   setShowSettings,
+  pointsToWin,
+  setPointsToWin,
+  roomCode,
 }: Props) => {
   // everytime the categories/difficulties state is updated, save it to session
+
+  const socket = useSocket();
+  const { user, setUser } = useUser();
 
   useEffect(() => {
     saveToSessionStorage("categories", categories);
@@ -50,6 +77,10 @@ const TriviaSettings = ({
   useEffect(() => {
     saveToSessionStorage("difficulties", difficulties);
   }, [difficulties]);
+
+  useEffect(() => {
+    saveToSessionStorage("timerDuration", { time: timerDuration });
+  }, [timerDuration]);
 
   // when the category/difficulty is updated, that means its state is the opposite of the prev
   // state, so update it in that way
@@ -70,150 +101,202 @@ const TriviaSettings = ({
     console.log(difficulties);
   };
 
-  const handleTimerDuration = () => {
-    const duration = document.getElementById(
-      "timerDurationInput"
-    ) as HTMLInputElement | null;
-    if (duration && duration.value) {
-      if (Number(duration.value) < 5) {
-        setTimerDuration(5);
-      } else if (Number(duration.value) > 30) {
-        setTimerDuration(30);
-      } else {
-        setTimerDuration(Number(duration.value));
-      }
+  const handleTimerDuration = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const duration = Number(event.target.value);
+    if (duration < 5) {
+      setTimerDuration(5);
+    } else if (duration > 30) {
+      setTimerDuration(30);
     } else {
-      setTimerDuration(15);
+      setTimerDuration(duration);
+    }
+  };
+
+  const handlePointsToWin = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (setPointsToWin) {
+      const points = Number(event.target.value);
+      if (points < 5) {
+        setPointsToWin(5);
+      } else if (points > 30) {
+        setPointsToWin(30);
+      } else {
+        setPointsToWin(points);
+      }
     }
   };
 
   const handleShowSettings = () => {
-    setShowSettings(false);
+    if (pointsToWin) {
+      socket?.emit("startGame", user.roomName, timerDuration);
+    } else {
+      setShowSettings(false);
+    }
   };
 
   // render the categories/difficulties checkboxes
   return (
-    <div className="overlay flex-column" style={{ textAlign: "left" }}>
+    <div className="settings flex-column" style={{ textAlign: "left" }}>
+      {!pointsToWin && (
+        <div
+          style={{
+            width: "100%",
+            display: "flex",
+            flexDirection: "row-reverse",
+            position: "relative",
+            top: "15px",
+            right: "15px",
+          }}
+        >
+          <button
+            style={{ borderStyle: "hidden", backgroundColor: "white" }}
+            onClick={handleShowSettings}
+          >
+            <span
+              className="material-symbols-outlined"
+              style={{ color: "gray", fontSize: "32px" }}
+            >
+              close
+            </span>
+          </button>
+        </div>
+      )}
       <div
         style={{
-          width: "100%",
-          display: "flex",
-          flexDirection: "row-reverse",
-          position: "relative",
-          top: "15px",
-          right: "15px",
+          maxWidth: "fitContent",
+          marginLeft: "auto",
+          marginRight: "auto",
         }}
       >
-        <button
-          style={{ borderStyle: "hidden", backgroundColor: "white" }}
-          onClick={handleShowSettings}
-        >
-          <span
-            className="material-symbols-outlined"
-            style={{ color: "gray", fontSize: "32px" }}
-          >
-            close
-          </span>
-        </button>
+        {roomCode && <h2>Room Code: {roomCode}</h2>}
       </div>
-      <div style={{ padding: "20px", paddingTop: "0px", width: "100%" }}>
-        <h2>Categories</h2>
-        <Checkbox
-          handleCheckboxChange={handleCategory}
-          displayName="Music"
-          category="music"
-          isChecked={categories["music"]}
-        />
-        <Checkbox
-          handleCheckboxChange={handleCategory}
-          displayName="Sports and Leisure"
-          category="sports_and_leisure"
-          isChecked={categories["sports_and_leisure"]}
-        />
-        <Checkbox
-          handleCheckboxChange={handleCategory}
-          displayName="Film and TV"
-          category="film_and_tv"
-          isChecked={categories["film_and_tv"]}
-        />
-        <Checkbox
-          handleCheckboxChange={handleCategory}
-          displayName="Arts and Literature"
-          category="arts_and_literature"
-          isChecked={categories["arts_and_literature"]}
-        />
-        <Checkbox
-          handleCheckboxChange={handleCategory}
-          displayName="History"
-          category="history"
-          isChecked={categories["history"]}
-        />
-        <Checkbox
-          handleCheckboxChange={handleCategory}
-          displayName="Society and Culture"
-          category="society_and_culture"
-          isChecked={categories["society_and_culture"]}
-        />
-        <Checkbox
-          handleCheckboxChange={handleCategory}
-          displayName="Science"
-          category="science"
-          isChecked={categories["science"]}
-        />
-        <Checkbox
-          handleCheckboxChange={handleCategory}
-          displayName="Geography"
-          category="geography"
-          isChecked={categories["geography"]}
-        />
-        <Checkbox
-          handleCheckboxChange={handleCategory}
-          displayName="Food and Drink"
-          category="food_and_drink"
-          isChecked={categories["food_and_drink"]}
-        />
-        <Checkbox
-          handleCheckboxChange={handleCategory}
-          displayName="General Knowledge"
-          category="general_knowledge"
-          isChecked={categories["general_knowledge"]}
-        />
-      </div>
-      <div style={{ padding: "20px", width: "100%" }}>
-        <h2>Difficulties</h2>
-        <Checkbox
-          handleCheckboxChange={handleDifficulty}
-          displayName="Easy"
-          category="easy"
-          isChecked={difficulties["easy"]}
-        />
-        <Checkbox
-          handleCheckboxChange={handleDifficulty}
-          displayName="Medium"
-          category="medium"
-          isChecked={difficulties["medium"]}
-        />
-        <Checkbox
-          handleCheckboxChange={handleDifficulty}
-          displayName="Hard"
-          category="hard"
-          isChecked={difficulties["hard"]}
-        />
-      </div>
-      <div style={{ padding: "20px" }}>
-        <h2>Timer Duration</h2>
-        <input
-          type="number"
-          id="timerDurationInput"
-          className="form-control"
-          min="5"
-          max="30"
-          placeholder="15"
-          style={{ width: "75px" }}
-          onChange={handleTimerDuration}
-        />
-        <div id="timerDurationInput" className="form-text">
-          Please input a number between 5 - 30 seconds.
+      <div className="flex-row">
+        <div className="flex-column">
+          <div style={{ padding: "20px", paddingTop: "0px", width: "100%" }}>
+            <h2>Categories</h2>
+            <Checkbox
+              handleCheckboxChange={handleCategory}
+              displayName="Music"
+              category="music"
+              isChecked={categories["music"]}
+            />
+            <Checkbox
+              handleCheckboxChange={handleCategory}
+              displayName="Sports and Leisure"
+              category="sports_and_leisure"
+              isChecked={categories["sports_and_leisure"]}
+            />
+            <Checkbox
+              handleCheckboxChange={handleCategory}
+              displayName="Film and TV"
+              category="film_and_tv"
+              isChecked={categories["film_and_tv"]}
+            />
+            <Checkbox
+              handleCheckboxChange={handleCategory}
+              displayName="Arts and Literature"
+              category="arts_and_literature"
+              isChecked={categories["arts_and_literature"]}
+            />
+            <Checkbox
+              handleCheckboxChange={handleCategory}
+              displayName="History"
+              category="history"
+              isChecked={categories["history"]}
+            />
+            <Checkbox
+              handleCheckboxChange={handleCategory}
+              displayName="Society and Culture"
+              category="society_and_culture"
+              isChecked={categories["society_and_culture"]}
+            />
+            <Checkbox
+              handleCheckboxChange={handleCategory}
+              displayName="Science"
+              category="science"
+              isChecked={categories["science"]}
+            />
+            <Checkbox
+              handleCheckboxChange={handleCategory}
+              displayName="Geography"
+              category="geography"
+              isChecked={categories["geography"]}
+            />
+            <Checkbox
+              handleCheckboxChange={handleCategory}
+              displayName="Food and Drink"
+              category="food_and_drink"
+              isChecked={categories["food_and_drink"]}
+            />
+            <Checkbox
+              handleCheckboxChange={handleCategory}
+              displayName="General Knowledge"
+              category="general_knowledge"
+              isChecked={categories["general_knowledge"]}
+            />
+          </div>
+          {pointsToWin && (
+            <div>
+              <h2>Points to Win</h2>
+              <input
+                type="number"
+                id="pointsToWinInput"
+                className="form-control"
+                min="10"
+                max="300"
+                placeholder="100"
+                style={{ width: "75px" }}
+                onChange={handlePointsToWin}
+              />
+              <div id="timerDurationInput" className="form-text">
+                Please input a number between 10 - 300 points.
+              </div>
+            </div>
+          )}
+        </div>
+        <div className="flex-column">
+          <div style={{ padding: "20px", paddingTop: "0px", width: "100%" }}>
+            <h2>Difficulties</h2>
+            <Checkbox
+              handleCheckboxChange={handleDifficulty}
+              displayName="Easy"
+              category="easy"
+              isChecked={difficulties["easy"]}
+            />
+            <Checkbox
+              handleCheckboxChange={handleDifficulty}
+              displayName="Medium"
+              category="medium"
+              isChecked={difficulties["medium"]}
+            />
+            <Checkbox
+              handleCheckboxChange={handleDifficulty}
+              displayName="Hard"
+              category="hard"
+              isChecked={difficulties["hard"]}
+            />
+          </div>
+          <div style={{ padding: "20px" }}>
+            <h2>Timer Duration</h2>
+            <input
+              type="number"
+              id="timerDurationInput"
+              className="form-control"
+              min="5"
+              max="30"
+              placeholder="15"
+              style={{ width: "75px" }}
+              onChange={handleTimerDuration}
+            />
+            <div id="timerDurationInput" className="form-text">
+              Please input a number between 5 - 30 seconds.
+            </div>
+            {pointsToWin && (
+              <div style={{ paddingTop: "20px" }}>
+                <h2>Start the Game</h2>
+                <button onClick={handleShowSettings}>GAME START</button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

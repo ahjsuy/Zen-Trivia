@@ -7,6 +7,7 @@ import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import TriviaSettings from "./TriviaSettings";
 import ReactHowler from "react-howler";
 import { Socket } from "socket.io-client";
+import { useUser } from "../UserContext";
 
 // helper function to load checked categories/difficulties per browser
 // session
@@ -14,6 +15,10 @@ import { Socket } from "socket.io-client";
 interface Props {
   socket: Socket | null;
   room: string;
+  multiplayer: boolean;
+  points?: number;
+  setPoints?: (points: number | ((prev: number) => number)) => void;
+  timeSet?: number;
 }
 
 const loadFromSessionStorage = (key: string, defaultValue: object) => {
@@ -39,12 +44,23 @@ type Problem = {
   type: string;
 };
 
-const TriviaGame = ({ socket, room }: Props) => {
+const TriviaGame = ({
+  socket,
+  room,
+  multiplayer,
+  points,
+  setPoints,
+  timeSet,
+}: Props) => {
   const [correct, setCorrect] = useState(false);
   const [result, setResult] = useState(false);
   const [newQuestion, setNewQuestion] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
-  const [timerDuration, setTimerDuration] = useState(15);
+  const [timerDuration, setTimerDuration] = useState(
+    () =>
+      // categories state
+      loadFromSessionStorage("timerDuration", { time: 15 }).time
+  );
   const [playMusic, setPlayMusic] = useState(1);
   const [key, setKey] = useState(0);
   const [prev, setPrev] = useState([
@@ -103,40 +119,44 @@ const TriviaGame = ({ socket, room }: Props) => {
     })
   );
 
+  const { user, setUser } = useUser();
+
   const handleCorrect = (choice: boolean) => {
     setCorrect(choice);
   };
 
   useEffect(() => {
-    console.log("fetching new question");
+    if (user.role === "leader" || !multiplayer) {
+      console.log("fetching new question");
 
-    // fetch a new problem from the API
-    const fetchProblem = async () => {
-      // everytime the newQuestion state is updated
+      // fetch a new problem from the API
+      const fetchProblem = async () => {
+        // everytime the newQuestion state is updated
 
-      let chosenCategories = Object.keys(categories)
-        .filter((key) => categories[key])
-        .join(",");
-      let chosenDifficulties = Object.keys(difficulties)
-        .filter((key) => difficulties[key])
-        .join(",");
-      console.log(chosenCategories);
-      console.log(chosenDifficulties);
-      let queryURL = "https://the-trivia-api.com/v2/questions?limit=1";
-      if (chosenDifficulties) {
-        queryURL += "&difficulties=" + chosenDifficulties;
-      }
-      if (chosenCategories) {
-        queryURL += "&categories=" + chosenCategories;
-      }
+        let chosenCategories = Object.keys(categories)
+          .filter((key) => categories[key])
+          .join(",");
+        let chosenDifficulties = Object.keys(difficulties)
+          .filter((key) => difficulties[key])
+          .join(",");
+        console.log(chosenCategories);
+        console.log(chosenDifficulties);
+        let queryURL = "https://the-trivia-api.com/v2/questions?limit=1";
+        if (chosenDifficulties) {
+          queryURL += "&difficulties=" + chosenDifficulties;
+        }
+        if (chosenCategories) {
+          queryURL += "&categories=" + chosenCategories;
+        }
 
-      if (socket) {
-        socket.emit("requestNew", queryURL, room);
-      }
-    };
+        if (socket) {
+          socket.emit("requestNew", queryURL, room);
+        }
+      };
 
-    fetchProblem();
-    setCorrect(false);
+      fetchProblem();
+      setCorrect(false);
+    }
   }, [newQuestion]);
 
   useEffect(() => {
@@ -181,18 +201,25 @@ const TriviaGame = ({ socket, room }: Props) => {
               <CountdownCircleTimer
                 key={key}
                 isPlaying={showSettings ? false : true}
-                duration={timerDuration}
+                duration={timeSet ? timeSet : timerDuration} // FIX
                 colors={["#004777", "#F7B801", "#FFA500", "#A30000"]}
-                colorsTime={[
-                  timerDuration,
-                  timerDuration - timerDuration / 4,
-                  timerDuration / 2,
-                  0,
-                ]}
+                colorsTime={
+                  timeSet
+                    ? [timeSet, timeSet - timeSet / 4, timeSet / 2]
+                    : [
+                        timerDuration,
+                        timerDuration - timerDuration / 4,
+                        timerDuration / 2,
+                        0,
+                      ]
+                }
                 size={200}
                 strokeWidth={20}
                 trailStrokeWidth={19}
                 onComplete={() => {
+                  if (setPoints) {
+                    setPoints((prev) => prev + 10 * Number(correct));
+                  }
                   setResult(true);
                   setTimeout(() => {
                     setNewQuestion(newQuestion + 1); // rerender newQuestion state so API fetch
@@ -230,7 +257,7 @@ const TriviaGame = ({ socket, room }: Props) => {
               onSelect={handleCorrect}
             ></AnswerList>
           )}
-        {showSettings && (
+        {!multiplayer && showSettings && (
           <div
             style={{
               position: "absolute",
@@ -257,16 +284,18 @@ const TriviaGame = ({ socket, room }: Props) => {
           </div>
         )}
       </div>
-      <button
-        type="button"
-        className="btn btn-light roboto-slab-default"
-        // style={{ position: "fixed", right: "5vh", bottom: "5vh" }}
-        onClick={() => {
-          setShowSettings(!showSettings);
-        }}
-      >
-        Change Quiz Settings
-      </button>
+      {!multiplayer && (
+        <button
+          type="button"
+          className="btn btn-light roboto-slab-default"
+          // style={{ position: "fixed", right: "5vh", bottom: "5vh" }}
+          onClick={() => {
+            setShowSettings(!showSettings);
+          }}
+        >
+          Change Quiz Settings
+        </button>
+      )}
     </div>
   );
 };

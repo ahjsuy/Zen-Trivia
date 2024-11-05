@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
+import { useSocket } from "../SocketContext";
 
 interface Props {
-  socket: Socket | null;
-  user: { username: string };
+  user: { role: string; username: string; icon: string; roomName: string };
 }
 
 type Message = {
@@ -11,9 +11,12 @@ type Message = {
   message: string;
 };
 
-const Chat = ({ socket, user }: Props) => {
+const Chat = ({ user }: Props) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [message, setMessage] = useState("");
+  const socket = useSocket();
+
+  useEffect(() => {}, []);
 
   // useEffect to handle receiving messages
   useEffect(() => {
@@ -40,7 +43,7 @@ const Chat = ({ socket, user }: Props) => {
   const handleFormSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (socket) {
-      socket.emit("sendMessage", message, user.username);
+      socket.emit("sendMessage", message, user.username, user.roomName);
     }
     setMessage("");
     console.log(user.username, "sent a message: ");

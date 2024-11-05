@@ -45,7 +45,7 @@ function App() {
             picture="groups"
             title="Coming Soon"
             description="compete against your friends"
-            link="/multiplayer/game/Client"
+            link="/multiplayer/game/Login"
           />{" "}
         </div>
       </div>

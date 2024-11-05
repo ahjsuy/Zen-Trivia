@@ -144,3 +144,9 @@ p {
   background-color: #a4c8e1;
   cursor: pointer;
 }
+
+.settings {
+  background-color: white;
+  border-radius: 2em;
+  padding: 1em;
+}

@@ -7,6 +7,8 @@ import Login from "./pages/multiplayer/game/Login";
 import Client from "./pages/multiplayer/game/Client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import SingleClient from "./pages/SingleClient";
+import { SocketProvider } from "./SocketContext";
+import { UserProvider } from "./UserContext";
 
 const router = createBrowserRouter([
   {
@@ -14,7 +16,7 @@ const router = createBrowserRouter([
     element: <App />,
   },
   {
-    path: "/Home",
+    path: "/multiplayer/game/Login",
     element: <Login />,
   },
   {
@@ -22,15 +24,19 @@ const router = createBrowserRouter([
     element: <SingleClient />,
   },
   {
-    path: "/multiplayer/game/Client",
+    path: "/multiplayer/game/Client/:roomName",
     element: <Client />,
   },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
-  <React.StrictMode>
-    {/* <BrowserRouter> */}
-    <RouterProvider router={router} />
-    {/* </BrowserRouter> */}
-  </React.StrictMode>
+  // <React.StrictMode>
+  <SocketProvider>
+    <UserProvider>
+      {/* <BrowserRouter> */}
+      <RouterProvider router={router} />
+      {/* </BrowserRouter> */}
+    </UserProvider>
+  </SocketProvider>
+  // </React.StrictMode>
 );
