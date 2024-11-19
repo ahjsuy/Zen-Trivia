@@ -13,7 +13,6 @@ To host this locally, you must first have React + Vite to launch the front end a
 Locate the Zen Trivia directory and run this command in the terminal.
 
 ```line_numbers,js
-[label shell]
 npm run server
 ```
 
@@ -24,7 +23,6 @@ npm run server
 Wait a few seconds for the express server to launch. Once it is up, open up another terminal in the Zen Trivia directory and run this command to launch the front end.
 
 ```line_numbers,js
-[label shell]
 npm run dev
 ```
 
