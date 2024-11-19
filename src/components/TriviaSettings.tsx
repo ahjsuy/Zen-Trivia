@@ -1,5 +1,5 @@
 import Checkbox from "../components/Checkbox";
-import { useState, useEffect, SetStateAction, Dispatch } from "react";
+import { useEffect, SetStateAction, Dispatch } from "react";
 import { useSocket } from "../SocketContext";
 import { useUser } from "../UserContext";
 
@@ -90,7 +90,6 @@ const TriviaSettings = ({
     newCategories[category as keyof typeof categories] =
       !newCategories[category as keyof typeof categories];
     setCategories(newCategories);
-    console.log(categories);
   };
 
   const handleDifficulty = (difficulty: string) => {
@@ -98,7 +97,6 @@ const TriviaSettings = ({
     newDifficulties[difficulty as keyof typeof difficulties] =
       !newDifficulties[difficulty as keyof typeof difficulties];
     setDifficulties(newDifficulties);
-    console.log(difficulties);
   };
 
   const handleTimerDuration = (event: React.ChangeEvent<HTMLInputElement>) => {

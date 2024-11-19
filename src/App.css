@@ -14,9 +14,6 @@
   justify-content: center;
   width: 75vw;
   margin: 20px;
-  /* min-width: 75%;
-  max-width: 105%; */
-  /* margin-bottom: 30px; */
 }
 
 html,
@@ -82,14 +79,6 @@ p {
   align-items: center;
   border-radius: 10px;
 }
-
-/* input::placeholder {
-  color: #d3d3d3 !important;
-  opacity: 1;
-} */
-
-/* // <uniquifier>: Use a unique and descriptive class name
-// <weight>: Use a value from 200 to 700 */
 
 .oswald-default {
   font-family: "Oswald", sans-serif;

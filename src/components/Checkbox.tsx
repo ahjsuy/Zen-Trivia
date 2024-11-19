@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 interface Props {
   category: string;
   displayName: string;
@@ -7,13 +5,17 @@ interface Props {
   handleCheckboxChange: (item: string) => void;
 }
 
-const Checkbox = ({ handleCheckboxChange, category, displayName, isChecked }: Props) => {
+const Checkbox = ({
+  handleCheckboxChange,
+  category,
+  displayName,
+  isChecked,
+}: Props) => {
   const handleChange = () => {
     handleCheckboxChange(category);
   };
   return (
     <div className="form-check">
-
       <input
         className="form-check-input"
         type="checkbox"

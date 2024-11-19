@@ -127,8 +127,6 @@ const TriviaGame = ({
 
   useEffect(() => {
     if (user.role === "leader" || !multiplayer) {
-      console.log("fetching new question");
-
       // fetch a new problem from the API
       const fetchProblem = async () => {
         // everytime the newQuestion state is updated
@@ -139,8 +137,6 @@ const TriviaGame = ({
         let chosenDifficulties = Object.keys(difficulties)
           .filter((key) => difficulties[key])
           .join(",");
-        console.log(chosenCategories);
-        console.log(chosenDifficulties);
         let queryURL = "https://the-trivia-api.com/v2/questions?limit=1";
         if (chosenDifficulties) {
           queryURL += "&difficulties=" + chosenDifficulties;
@@ -152,19 +148,18 @@ const TriviaGame = ({
         if (socket) {
           socket.emit("requestNew", queryURL, room);
         }
+        console.log("requesting new for ", room);
       };
 
       fetchProblem();
       setCorrect(false);
     }
-  }, [newQuestion]);
+  }, [newQuestion, room]);
 
   useEffect(() => {
     if (socket) {
       const handleMessage = (res: Problem[]) => {
-        console.log("got new question!", res);
         setProblem(res);
-        console.log("SET NEW PROBLEM: ", problem);
       };
 
       socket.on("responseQuestion", handleMessage);
@@ -185,7 +180,7 @@ const TriviaGame = ({
       }}
     >
       <ReactHowler
-        src="sounds\once-in-paris-168895.mp3"
+        src="../../../public/sounds/once-in-paris-168895.mp3"
         playing={playMusic != 0}
         volume={playMusic / 8}
         loop={true}
@@ -226,7 +221,6 @@ const TriviaGame = ({
                     setResult(false); // stop showing if the selection is correct
                     setKey((prev) => prev + 1);
                   }, 3000);
-                  console.log("COMPLETED");
                   return { shouldRepeat: true, delay: 3 };
                 }}
               >
@@ -288,7 +282,6 @@ const TriviaGame = ({
         <button
           type="button"
           className="btn btn-light roboto-slab-default"
-          // style={{ position: "fixed", right: "5vh", bottom: "5vh" }}
           onClick={() => {
             setShowSettings(!showSettings);
           }}

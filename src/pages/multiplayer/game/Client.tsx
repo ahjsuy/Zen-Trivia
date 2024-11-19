@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import Chat from "../../../components/Chat";
 import TriviaGame from "../../../components/TriviaGame";
 import TriviaSettings from "../../../components/TriviaSettings";

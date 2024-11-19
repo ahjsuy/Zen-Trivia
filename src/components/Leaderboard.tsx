@@ -17,7 +17,6 @@ const Leaderboard = () => {
     if (socket) {
       socket.on("usersList", (usersList) => {
         setUsersList(usersList);
-        console.log("new user joined");
       });
 
       socket.on("pointsUpdate", (username, points) => {

@@ -1,12 +1,4 @@
-import Question from "./components/Question";
-import AnswerList from "./components/AnswerList";
 import "./App.css";
-import { useState, useEffect } from "react";
-import { CountdownCircleTimer } from "react-countdown-circle-timer";
-import Alert from "./components/Alert";
-import TriviaGame from "./components/TriviaGame";
-import Body from "./components/Body";
-import { Link } from "react-router-dom";
 import GamemodeCard from "./components/GamemodeCard";
 
 function App() {
@@ -43,7 +35,7 @@ function App() {
           />{" "}
           <GamemodeCard
             picture="groups"
-            title="Coming Soon"
+            title="Multiplayer"
             description="compete against your friends"
             link="/multiplayer/game/Login"
           />{" "}

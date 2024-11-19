@@ -50,7 +50,6 @@ const AnswerList = ({
           newAnswerStatuses[i] = "list-group-item list-group-item-success";
           setCorrectFX(true);
           incorrectAnswer = false;
-          console.log("TRIGGERED CORRECT FX");
         }
         if (i == selectedIndex) {
           newAnswerStatuses[i] = "list-group-item list-group-item-danger";
@@ -61,7 +60,6 @@ const AnswerList = ({
       }
       if (incorrectAnswer) {
         setIncorrectFX(true);
-        console.log("TRIGGERED INCORRECT FX");
       }
       setAnswerStatuses(newAnswerStatuses);
     }
@@ -89,12 +87,7 @@ const AnswerList = ({
         {answers.map((answer, index) => (
           <li // ordered list of answers
             key={index} // index was decided on pre sort passed down
-            className={
-              answerStatuses[index]
-              // selectedIndex === index  // if the answer is selected, change the styling to active
-              //   ? "list-group-item list-group-item-action active"
-              //   : "list-group-item list-group-item-action"
-            }
+            className={answerStatuses[index]}
             style={{
               textAlign: "center",
               width: "50vw",

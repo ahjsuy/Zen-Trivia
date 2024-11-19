@@ -39,10 +39,8 @@ const Login = () => {
     if (socket) {
       socket.on("currentRoom", (roomName) => {
         if (roomName != "invalid") {
-          console.log("Joined ", roomName);
           setRoomName(roomName);
         } else {
-          console.log("invalid");
           setAlertStatus(true);
         }
       });
@@ -55,7 +53,6 @@ const Login = () => {
 
   const handleCreateRoom = () => {
     if (socket) {
-      console.log("requesting a new room");
       setUser((prev) => ({ ...prev, role: "leader" }));
       socket.emit("roomCreate", username);
     }
@@ -65,7 +62,6 @@ const Login = () => {
     if (socket) {
       socket.emit("roomJoin", user.roomName, user.username);
       setUser((prev) => ({ ...prev, role: "player" }));
-      console.log("joining an existing", user.roomName);
     }
   };
 
@@ -154,6 +150,8 @@ const Login = () => {
               placeContent: "left",
               textAlign: "left",
               borderRight: "solid",
+              borderColor: "lightGray",
+              borderWidth: "2px",
               padding: "5px",
             }}
           >
@@ -181,12 +179,30 @@ const Login = () => {
                   Enter the four letter room code
                 </small>
               </div>
-              <button onClick={handleJoinRoom}>Join</button>
+              <button
+                onClick={handleJoinRoom}
+                style={{
+                  paddingRight: "10px",
+                  paddingLeft: "10px",
+                  marginTop: "10px",
+                }}
+              >
+                Join
+              </button>
             </form>
           </div>
           <div className="flex-column">
             <div>Create a room</div>
-            <button onClick={handleCreateRoom}>Create</button>
+            <button
+              style={{
+                paddingRight: "10px",
+                paddingLeft: "10px",
+                marginTop: "10px",
+              }}
+              onClick={handleCreateRoom}
+            >
+              Create
+            </button>
           </div>
         </div>
       </div>

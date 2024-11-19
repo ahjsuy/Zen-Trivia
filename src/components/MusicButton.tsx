@@ -1,5 +1,3 @@
-import { useState, useEffect } from "react";
-
 interface Props {
   playMusic: number;
   setPlayMusic: (newVolume: number) => void;

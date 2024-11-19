@@ -18,7 +18,6 @@ const Chat = ({ user }: Props) => {
 
   useEffect(() => {}, []);
 
-  // useEffect to handle receiving messages
   useEffect(() => {
     if (socket) {
       const handleMessage = (msg: string, socketID: string) => {
@@ -26,27 +25,22 @@ const Chat = ({ user }: Props) => {
           { senderID: socketID, message: msg },
           ...prevMessages,
         ]);
-        console.log("receiving ", msg);
       };
 
-      // Set up the listener
       socket.on("message", handleMessage);
 
-      // Cleanup to remove the listener on unmount or when socket changes
       return () => {
         socket.off("message", handleMessage);
       };
     }
   }, [socket]);
 
-  // handleSendMessage to send messages
   const handleFormSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (socket) {
       socket.emit("sendMessage", message, user.username, user.roomName);
     }
     setMessage("");
-    console.log(user.username, "sent a message: ");
   };
 
   return (

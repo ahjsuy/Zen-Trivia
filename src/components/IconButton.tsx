@@ -31,7 +31,6 @@ const IconButton = ({
           <button
             onClick={() => {
               setSelected(name);
-              console.log(name, "is selected");
             }}
             style={{ backgroundColor: "white", borderStyle: "hidden" }}
           >
