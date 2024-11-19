@@ -1,7 +1,5 @@
 import express, { Request, Response } from "express";
-import cors from "cors";
 import http from "http";
-import socketIO from "@nestjs/platform-socket.io";
 import { Server } from "socket.io";
 
 const app = express();

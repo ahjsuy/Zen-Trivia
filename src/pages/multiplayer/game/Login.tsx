@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from "react";
 import IconButton from "../../../components/IconButton";
-import { io, Socket } from "socket.io-client"; // Make sure this is installed: npm install socket.io-client
 import { useNavigate } from "react-router-dom";
 import { useSocket } from "../../../SocketContext";
 import { useUser } from "../../../UserContext";
