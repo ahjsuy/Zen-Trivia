@@ -7,6 +7,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import SingleClient from "./pages/SingleClient";
 import { SocketProvider } from "./SocketContext";
 import { UserProvider } from "./UserContext";
+import SinglePlayer from "./components/SinglePlayer";
 
 const router = createBrowserRouter([
   {
@@ -19,7 +20,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/SingleClient",
-    element: <SingleClient />,
+    element: <SinglePlayer />,
   },
   {
     path: "/multiplayer/game/Client/:roomName",

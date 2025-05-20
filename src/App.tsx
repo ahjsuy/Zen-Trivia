@@ -3,7 +3,7 @@ import GamemodeCard from "./components/GamemodeCard";
 
 function App() {
   return (
-    <div className="grad" style={{ gap: "15vh" }}>
+    <div className="grad flex-column" style={{ gap: "15vh" }}>
       <div
         className="container oswald-default"
         style={{

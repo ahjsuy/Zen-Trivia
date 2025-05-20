@@ -20,7 +20,7 @@ html,
 body {
   margin: 0;
   padding: 0;
-  min-height: 100vh;
+  height: 100vh;
 }
 
 *,
@@ -102,17 +102,18 @@ p {
 }
 
 .grad {
-  background-color: #3e5f8a; /* For browsers that do not support gradients */
+  background-color: #3e5f8a;
   background: linear-gradient(
     rgba(62, 95, 138, 1) 0%,
     rgba(64, 110, 170, 1) 40%,
     rgba(187, 196, 198, 1) 100%
   );
-  min-height: 100vh;
-  min-width: 100vh;
+  height: 100vh;
+  width: 100vw;
   margin: 0;
   display: flex;
-  flex-direction: column;
+  place-content: center;
+  align-items: center;
 }
 
 .flex-column {
@@ -138,4 +139,10 @@ p {
   background-color: white;
   border-radius: 2em;
   padding: 1em;
+  position: relative;
+}
+
+.list-group-item:hover {
+  background-color: #c5c5c5;
+  cursor: pointer;
 }

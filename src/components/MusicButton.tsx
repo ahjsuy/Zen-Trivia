@@ -16,7 +16,7 @@ const MusicButton = ({ playMusic, setPlayMusic }: Props) => {
   return (
     <button
       className="btn"
-      style={{ width: "50px", height: "50px" }}
+      style={{ width: "50px", height: "50px", background: "transparent" }}
       onClick={handleMusic}
     >
       {playMusic == 2 && (

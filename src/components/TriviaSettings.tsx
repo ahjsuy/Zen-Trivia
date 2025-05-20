@@ -82,23 +82,6 @@ const TriviaSettings = ({
     saveToSessionStorage("timerDuration", { time: timerDuration });
   }, [timerDuration]);
 
-  // when the category/difficulty is updated, that means its state is the opposite of the prev
-  // state, so update it in that way
-
-  const handleCategory = (category: string) => {
-    let newCategories = { ...categories };
-    newCategories[category as keyof typeof categories] =
-      !newCategories[category as keyof typeof categories];
-    setCategories(newCategories);
-  };
-
-  const handleDifficulty = (difficulty: string) => {
-    let newDifficulties = { ...difficulties };
-    newDifficulties[difficulty as keyof typeof difficulties] =
-      !newDifficulties[difficulty as keyof typeof difficulties];
-    setDifficulties(newDifficulties);
-  };
-
   const handleTimerDuration = (event: React.ChangeEvent<HTMLInputElement>) => {
     const duration = Number(event.target.value);
     if (duration < 5) {
@@ -171,66 +154,30 @@ const TriviaSettings = ({
         <div className="flex-column">
           <div style={{ padding: "20px", paddingTop: "0px", width: "100%" }}>
             <h2>Categories</h2>
-            <Checkbox
-              handleCheckboxChange={handleCategory}
-              displayName="Music"
-              category="music"
-              isChecked={categories["music"]}
-            />
-            <Checkbox
-              handleCheckboxChange={handleCategory}
-              displayName="Sports and Leisure"
-              category="sports_and_leisure"
-              isChecked={categories["sports_and_leisure"]}
-            />
-            <Checkbox
-              handleCheckboxChange={handleCategory}
-              displayName="Film and TV"
-              category="film_and_tv"
-              isChecked={categories["film_and_tv"]}
-            />
-            <Checkbox
-              handleCheckboxChange={handleCategory}
-              displayName="Arts and Literature"
-              category="arts_and_literature"
-              isChecked={categories["arts_and_literature"]}
-            />
-            <Checkbox
-              handleCheckboxChange={handleCategory}
-              displayName="History"
-              category="history"
-              isChecked={categories["history"]}
-            />
-            <Checkbox
-              handleCheckboxChange={handleCategory}
-              displayName="Society and Culture"
-              category="society_and_culture"
-              isChecked={categories["society_and_culture"]}
-            />
-            <Checkbox
-              handleCheckboxChange={handleCategory}
-              displayName="Science"
-              category="science"
-              isChecked={categories["science"]}
-            />
-            <Checkbox
-              handleCheckboxChange={handleCategory}
-              displayName="Geography"
-              category="geography"
-              isChecked={categories["geography"]}
-            />
-            <Checkbox
-              handleCheckboxChange={handleCategory}
-              displayName="Food and Drink"
-              category="food_and_drink"
-              isChecked={categories["food_and_drink"]}
-            />
-            <Checkbox
-              handleCheckboxChange={handleCategory}
-              displayName="General Knowledge"
-              category="general_knowledge"
-              isChecked={categories["general_knowledge"]}
-            />
+
+            {Object.entries(categories).map((item) => (
+              <div>
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  value=""
+                  id="flexCheckDefault"
+                  onChange={() => {
+                    setCategories((prev) => ({
+                      ...prev,
+                      [item[0]]: !item[1],
+                    }));
+                  }}
+                  checked={item[1]}
+                />
+                <label className="form-check-label" htmlFor="flexCheckDefault">
+                  {item[0]
+                    .split("_")
+                    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                    .join(" ")}
+                </label>
+              </div>
+            ))}
           </div>
           {pointsToWin && (
             <div>
@@ -254,24 +201,26 @@ const TriviaSettings = ({
         <div className="flex-column">
           <div style={{ padding: "20px", paddingTop: "0px", width: "100%" }}>
             <h2>Difficulties</h2>
-            <Checkbox
-              handleCheckboxChange={handleDifficulty}
-              displayName="Easy"
-              category="easy"
-              isChecked={difficulties["easy"]}
-            />
-            <Checkbox
-              handleCheckboxChange={handleDifficulty}
-              displayName="Medium"
-              category="medium"
-              isChecked={difficulties["medium"]}
-            />
-            <Checkbox
-              handleCheckboxChange={handleDifficulty}
-              displayName="Hard"
-              category="hard"
-              isChecked={difficulties["hard"]}
-            />
+            {Object.entries(difficulties).map((item) => (
+              <div>
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  value=""
+                  id="flexCheckDefault"
+                  onChange={() => {
+                    setDifficulties((prev) => ({
+                      ...prev,
+                      [item[0]]: !item[1],
+                    }));
+                  }}
+                  checked={item[1]}
+                />
+                <label className="form-check-label" htmlFor="flexCheckDefault">
+                  {item[0].charAt(0).toUpperCase() + item[0].slice(1)}
+                </label>
+              </div>
+            ))}
           </div>
           <div style={{ padding: "20px" }}>
             <h2>Timer Duration</h2>
