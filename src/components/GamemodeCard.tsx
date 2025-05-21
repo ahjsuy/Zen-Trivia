@@ -10,11 +10,11 @@ interface Props {
 const GamemodeCard = ({ title, picture, description, link }: Props) => {
   return (
     <div
-      className="card flex-column roboto-slab-default"
+      className="card flex-column roboto-slab-default box-shadow"
       style={{
         placeItems: "center",
         textAlign: "center",
-        width: "50vw",
+        width: "25vw",
         borderRadius: "2vw",
         padding: "2vw",
       }}

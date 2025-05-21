@@ -3,7 +3,6 @@ import ReactHowler from "react-howler";
 import MusicButton from "./MusicButton";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import AnswerList from "./AnswerList";
-import TriviaGame from "./TriviaGame";
 import TriviaSettingsSinglePlayer from "./TriviaSettingsSinglePlayer";
 
 interface triviaQuestion {
@@ -61,10 +60,12 @@ const SinglePlayer = () => {
   });
   const [playMusic, setPlayMusic] = useState<number>(1);
   const [timerDuration, setTimerDuration] = useState<number>(15);
+  const [timerLength, setTimerLength] = useState<number>(15);
   const [correctIsSelected, setCorrectIsSelected] = useState<boolean>(false);
   const [roundComplete, setRoundComplete] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showPoints, setShowPoints] = useState<number[]>([0, 0]);
+  const [roundId, setRoundId] = useState<number>(0);
 
   let queryURL = "https://the-trivia-api.com/v2/questions?limit=10";
 
@@ -77,7 +78,7 @@ const SinglePlayer = () => {
         console.log(queryURL + " fetched new problems: ", newProblemsJSON);
         if (refresh) {
           console.log("Refreshed question bank with new settings");
-          setQuestionBank(newProblemsJSON);
+          setQuestionBank((prev) => [prev[0], ...newProblemsJSON]);
         } else {
           setQuestionBank((prev) => [...prev, ...newProblemsJSON]);
         }
@@ -103,10 +104,21 @@ const SinglePlayer = () => {
 
   // refresh the question bank when difficulties/categories change
   useEffect(() => {
-    if (!showSettings) {
+    let diff: triviaQuestion[] = questionBank.filter((item) => {
+      if (
+        categories[item.category as keyof categoriesList] &&
+        difficulties[item.difficulty as keyof difficultiesList]
+      ) {
+        return false;
+      } else {
+        return true;
+      }
+    });
+    console.log("Questions that do not fit current settings: ", diff);
+    if (!showSettings && diff.length != 0) {
       queryURL = "https://the-trivia-api.com/v2/questions?limit=10";
 
-      const categoryUrl = [];
+      const categoryUrl: string[] = [];
       for (const [key, value] of Object.entries(categories)) {
         if (value) categoryUrl.push(key);
       }
@@ -114,7 +126,7 @@ const SinglePlayer = () => {
         queryURL += "&categories=";
         queryURL += categoryUrl.join(",");
       }
-      const difficultiesUrl = [];
+      const difficultiesUrl: string[] = [];
       for (const [key, value] of Object.entries(difficulties)) {
         if (value) difficultiesUrl.push(key);
       }
@@ -156,6 +168,7 @@ const SinglePlayer = () => {
           style={{ fontSize: "3rem", color: "white" }}
         >
           <CountdownCircleTimer
+            key={timerDuration}
             isPlaying={!showSettings}
             duration={timerDuration}
             colors={["#004777", "#F7B801", "#FFA500", "#A30000"]}
@@ -169,6 +182,7 @@ const SinglePlayer = () => {
             trailStrokeWidth={19}
             onComplete={() => {
               setRoundComplete(true);
+
               setTimeout(() => {
                 setQuestionBank((prev) => prev.slice(1));
                 setShowPoints((prev) => [
@@ -178,6 +192,7 @@ const SinglePlayer = () => {
                 setRoundComplete(false);
                 setCorrectIsSelected(false);
               }, 2750);
+
               return { shouldRepeat: true, delay: 3 };
             }}
           >
@@ -242,7 +257,7 @@ const SinglePlayer = () => {
 
         <button
           type="button"
-          className="btn btn-light roboto-slab-default"
+          className="btn btn-light roboto-slab-default box-shadow"
           onClick={() => {
             setShowSettings(!showSettings);
           }}

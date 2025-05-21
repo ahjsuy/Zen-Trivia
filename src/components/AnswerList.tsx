@@ -71,7 +71,7 @@ const AnswerList = ({
   }, [roundComplete]);
 
   return (
-    <div>
+    <div className="box-shadow">
       <ReactHowler
         src="\sounds\correct-choice-43861.mp3"
         playing={roundComplete && correctIsSelected}

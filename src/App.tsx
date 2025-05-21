@@ -5,7 +5,7 @@ function App() {
   return (
     <div className="grad flex-column" style={{ gap: "15vh" }}>
       <div
-        className="container oswald-default"
+        className="container oswald-default text-shadow "
         style={{
           fontSize: "15vh",
           color: "white",
@@ -26,19 +26,39 @@ function App() {
           gap: "1em",
         }}
       >
-        <div className="flex-row" style={{ gap: "1em", maxWidth: "75vh" }}>
+        <div className="flex-row" style={{ gap: "1em", maxWidth: "75vw" }}>
           <GamemodeCard
             picture="person"
             title="Classic"
             description="an endless singleplayer experience"
             link="/SingleClient"
           />{" "}
-          <GamemodeCard
-            picture="groups"
-            title="Multiplayer"
-            description="compete against your friends"
-            link="/multiplayer/game/Login"
-          />{" "}
+          <div
+            style={{
+              borderRadius: "2vw",
+              position: "relative",
+              width: "fit-content",
+            }}
+          >
+            <GamemodeCard
+              picture="groups"
+              title="Multiplayer"
+              description="Under revision. Come back soon!"
+              link=""
+            />{" "}
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(128, 128, 128, 0.7)", // semi-transparent gray
+                zIndex: 2,
+                borderRadius: "2vw",
+              }}
+            />
+          </div>
         </div>
       </div>
       <div

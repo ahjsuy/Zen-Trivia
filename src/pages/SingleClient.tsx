@@ -1,4 +1,4 @@
-import TriviaGame from "../components/TriviaGame";
+// import TriviaGame from "../components/TriviaGame";
 import { useEffect, useState } from "react";
 import { useSocket } from "../SocketContext";
 import { useUser } from "../UserContext";
@@ -29,7 +29,7 @@ const SingleClient = () => {
 
   return (
     <div>
-      <TriviaGame socket={socket} room={user.roomName} multiplayer={false} />
+      {/* <TriviaGame socket={socket} room={user.roomName} multiplayer={false} /> */}
     </div>
   );
 };

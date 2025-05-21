@@ -1,13 +1,4 @@
-import { useEffect, SetStateAction, Dispatch } from "react";
-import { useSocket } from "../SocketContext";
-import { useUser } from "../UserContext";
-
-// helper function to save checked categories/difficulties per browser
-// session
-
-const saveToSessionStorage = (key: string, value: object) => {
-  sessionStorage.setItem(key, JSON.stringify(value));
-};
+import { SetStateAction, Dispatch } from "react";
 
 interface Props {
   categories: {
@@ -58,23 +49,6 @@ const TriviaSettings = ({
   setTimerDuration,
   setShowSettings,
 }: Props) => {
-  // everytime the categories/difficulties state is updated, save it to session
-
-  const socket = useSocket();
-  const { user, setUser } = useUser();
-
-  useEffect(() => {
-    saveToSessionStorage("categories", categories);
-  }, [categories]);
-
-  useEffect(() => {
-    saveToSessionStorage("difficulties", difficulties);
-  }, [difficulties]);
-
-  useEffect(() => {
-    saveToSessionStorage("timerDuration", { time: timerDuration });
-  }, [timerDuration]);
-
   const handleTimerDuration = (event: React.ChangeEvent<HTMLInputElement>) => {
     const duration = Number(event.target.value);
     if (duration < 5) {
@@ -88,7 +62,7 @@ const TriviaSettings = ({
 
   return (
     <div
-      className="settings flex-column roboto-slab-default"
+      className="settings flex-column roboto-slab-default box-shadow"
       style={{ textAlign: "left" }}
     >
       {
