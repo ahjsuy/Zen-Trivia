@@ -1,6 +1,6 @@
+import "bootstrap/dist/css/bootstrap.css";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import "bootstrap/dist/css/bootstrap.css";
 import Login from "./pages/multiplayer/game/Login";
 // import Client from "./pages/multiplayer/game/Client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
