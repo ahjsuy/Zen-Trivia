@@ -12,10 +12,9 @@
   "dependencies": {
     "@nestjs/platform-socket.io": "^10.4.4",
     "@nestjs/websockets": "^10.4.4",
-    "bootstrap": "^5.2.3",
+    "bootstrap": "^3.4.1",
     "cors": "^2.8.5",
     "express": "^4.21.1",
-    "firebase": "^10.13.2",
     "http": "^0.0.1-security",
     "react": "^18.2.0",
     "react-countdown-circle-timer": "^3.2.1",
