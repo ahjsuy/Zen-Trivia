@@ -21,6 +21,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100vh;
+  font-family: "Roboto Slab", serif !important;
 }
 
 *,
@@ -80,6 +81,13 @@ p {
   border-radius: 10px;
 }
 
+.inter-default {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
 .oswald-default {
   font-family: "Oswald", sans-serif;
   font-optical-sizing: auto;
@@ -102,18 +110,26 @@ p {
 }
 
 .grad {
-  background-color: #3e5f8a;
-  background: linear-gradient(
-    rgba(62, 95, 138, 1) 0%,
-    rgba(64, 110, 170, 1) 40%,
-    rgba(187, 196, 198, 1) 100%
-  );
+  background: #00c9ff;
+  background: linear-gradient(-45deg, #e6c3a5, #eacda3, #d9a7c7, #ffd6a5);
   height: 100vh;
   width: 100vw;
+  background-size: 400% 400%;
   margin: 0;
   display: flex;
-  place-content: center;
-  align-items: center;
+  animation: gradient 10s ease infinite;
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .flex-column {
@@ -124,6 +140,12 @@ p {
 .flex-row {
   display: flex;
   flex-direction: row;
+}
+
+.center {
+  place-content: center;
+  place-items: center;
+  text-align: center;
 }
 
 .card {

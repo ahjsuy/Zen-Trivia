@@ -1,145 +1,106 @@
-// import { useEffect, useState, useRef } from "react";
-// import Chat from "../../../components/Chat";
-// import TriviaGame from "../../../components/TriviaGame";
-// import TriviaSettings from "../../../components/TriviaSettings";
-// import Leaderboard from "../../../components/Leaderboard";
-// import { useUser } from "../../../UserContext";
-// import { useSocket } from "../../../SocketContext";
+import { useEffect, useState, useRef } from "react";
+import Chat from "../../../components/Chat";
+import Leaderboard from "../../../components/Leaderboard";
+import Navbar from "../../../components/navbar";
+import { useUser } from "../../../UserContext";
+import { useSocket } from "../../../SocketContext";
+import MultiPlayer from "../../../components/MultiPlayer";
+import TriviaSettingsMultiplayer from "../../../components/TriviaSettingsMultiplayer";
 
-// function Client() {
-//   const isFirstRender = useRef(true);
-//   const socket = useSocket();
-//   const { user, setUser } = useUser();
-//   const [points, setPoints] = useState(0);
-//   const [gameSetUp, setGameSetUp] = useState(true);
-//   const [gameWon, setGameWon] = useState("");
-//   const [timerDuration, setTimerDuration] = useState(15);
-//   const [pointsToWin, setPointsToWin] = useState(100);
-//   const [categories, setCategories] = useState({
-//     music: true,
-//     sports_and_leisure: true,
-//     film_and_tv: true,
-//     arts_and_literature: true,
-//     history: true,
-//     society_and_culture: true,
-//     science: true,
-//     geography: true,
-//     food_and_drink: true,
-//     general_knowledge: true,
-//   });
+function Client() {
+  const isFirstRender = useRef(true);
+  const socket = useSocket();
 
-//   const [difficulties, setDifficulties] = useState({
-//     easy: true,
-//     medium: true,
-//     hard: true,
-//   });
+  const { user, setUser } = useUser();
+  const [showSettings, setShowSettings] = useState(true);
+  const [showWinner, setShowWinner] = useState<string>("");
+  const [timerDuration, setTimerDuration] = useState<number>(15);
+  const [pointsToWin, setPointsToWin] = useState<number>(100);
+  const [queryURL, setQueryUrl] = useState<string>(
+    "https://the-trivia-api.com/v2/questions?limit=10"
+  );
 
-//   useEffect(() => {
-//     socket?.emit(
-//       "updatePoints",
-//       user.roomName,
-//       user.username,
-//       points,
-//       pointsToWin
-//     );
-//   }, [points]);
+  // useEffect(() => {
+  //   socket?.emit(
+  //     "updatePoints",
+  //     user.roomName,
+  //     user.username,
+  //     points,
+  //     pointsToWin
+  //   );
+  // }, [points]);
 
-//   useEffect(() => {
-//     socket?.on("gameStart", (time) => {
-//       if (gameSetUp) {
-//         setGameSetUp(false);
-//       }
-//       setTimerDuration(time);
-//     });
-//     socket?.on("gameWon", (username) => {
-//       setGameSetUp(true);
-//       setGameWon(username);
-//     });
-//   }, [socket]);
+  useEffect(() => {
+    if (!socket) return;
+    const handleGameStart = ({
+      timer,
+      points,
+      url,
+    }: {
+      timer: number;
+      points: number;
+      url: string;
+    }) => {
+      setShowSettings(false);
+      setPointsToWin(points);
+      setTimerDuration(timer);
+      setQueryUrl(url);
+    };
+    const handleGameOver = (username: string) => {
+      console.log(username + " won!");
+      setShowWinner(username);
+    };
 
-//   return (
-//     <div className="grad flex-row">
-//       <div>
-//         {gameWon && (
-//           <div
-//             style={{
-//               display: "flex",
-//               position: "absolute",
-//               background: "white",
-//               minHeight: "100%",
-//               minWidth: "100%",
-//               zIndex: "999",
-//             }}
-//           >
-//             {" "}
-//             <h1>the game was won by {gameWon}</h1>
-//           </div>
-//         )}
-//       </div>
-//       <div style={{ flexGrow: "1" }}>
-//         {user.role === "leader" &&
-//           (gameSetUp ? (
-//             <div
-//               style={{
-//                 display: "flex",
-//                 justifyContent: "center",
-//                 alignItems: "center",
-//                 height: "100vh",
-//                 top: "20%",
-//               }}
-//             >
-//               <TriviaSettings
-//                 categories={categories}
-//                 difficulties={difficulties}
-//                 timerDuration={timerDuration}
-//                 setCategories={setCategories}
-//                 setDifficulties={setDifficulties}
-//                 setTimerDuration={setTimerDuration}
-//                 setShowSettings={setGameSetUp}
-//                 pointsToWin={pointsToWin}
-//                 setPointsToWin={setPointsToWin}
-//                 roomCode={user.roomName}
-//               />
-//             </div>
-//           ) : (
-//             <TriviaGame
-//               socket={socket}
-//               room={user.roomName}
-//               multiplayer={true}
-//               points={points}
-//               setPoints={setPoints}
-//               timeSet={timerDuration}
-//             />
-//           ))}
-//         {user.role === "player" &&
-//           (gameSetUp ? (
-//             <div>
-//               <h1>Waiting for the leader to start the game</h1>
-//             </div>
-//           ) : (
-//             <div>
-//               <TriviaGame
-//                 socket={socket}
-//                 room={user.roomName}
-//                 multiplayer={true}
-//                 points={points}
-//                 setPoints={setPoints}
-//                 timeSet={timerDuration}
-//               />
-//             </div>
-//           ))}
-//       </div>
-//       <div className="flex-column">
-//         <div>
-//           <Leaderboard />
-//         </div>
-//         <Chat user={user} />
-//       </div>
-//     </div>
-//   );
-// }
+    socket.on("gameStart", handleGameStart);
+    socket.on("gameOver", handleGameOver);
 
-// export default Client;
+    return () => {
+      socket.off("gameStart", handleGameStart);
+      socket.off("gameOver", handleGameOver);
+    };
 
-const Client = () => {};
+    // socket?.on("gameStart", () => {
+    //   setShowSettings(false);
+    // });
+    // socket?.on("gameWon", (username) => {
+    //   setShowWinner(username);
+    // });
+  }, [socket]);
+
+  return (
+    <div className="grad flex-column">
+      <Navbar />
+      <div className="flex-row" style={{ flex: 1, overflow: "auto" }}>
+        <div style={{ flex: 5, alignContent: "center" }}>
+          {showSettings && user.role === "leader" && (
+            <TriviaSettingsMultiplayer roomCode={user.roomName} />
+          )}
+          {showSettings && user.role !== "leader" && (
+            <div>Waiting for room leader to start game</div>
+          )}
+          {!showSettings && showWinner === "" && (
+            <MultiPlayer
+              timerDuration={timerDuration}
+              queryURL={queryURL}
+              pointsToWin={pointsToWin}
+            />
+          )}
+          {showWinner !== "" && (
+            <div style={{ height: "100%" }}>
+              <h1>TEST</h1>
+              <h1>{showWinner} won the game!</h1>
+            </div>
+          )}
+        </div>
+        <div style={{ flex: 1 }}>
+          <Chat user={user} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default Client;
+
+// const Client = () => {};
+// export default Client;

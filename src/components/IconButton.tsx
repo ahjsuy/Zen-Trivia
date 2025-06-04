@@ -1,6 +1,6 @@
 interface Props {
   name: string;
-  fontSize: number;
+  fontSize: string;
   onClick?: () => void;
   selected?: string;
   setSelected?: (selected: string) => void;
@@ -13,12 +13,20 @@ const IconButton = ({
   selected,
   setSelected,
 }: Props) => {
-  if (selected && setSelected) {
+  if (setSelected) {
     return (
       <div>
         {selected == name ? (
           <button
-            style={{ backgroundColor: "lightBlue", borderStyle: "hidden" }}
+            style={{
+              border: "1",
+              borderStyle: "solid",
+              borderColor: "gray",
+              borderRadius: "2rem",
+              height: fontSize,
+              width: fontSize,
+              padding: "0.35rem",
+            }}
           >
             <span
               className="material-symbols-outlined"
@@ -32,7 +40,14 @@ const IconButton = ({
             onClick={() => {
               setSelected(name);
             }}
-            style={{ backgroundColor: "white", borderStyle: "hidden" }}
+            style={{
+              backgroundColor: "white",
+              borderStyle: "hidden",
+              borderRadius: "2rem",
+              height: fontSize,
+              width: fontSize,
+              padding: "0.35rem",
+            }}
           >
             <span
               className="material-symbols-outlined"
@@ -48,7 +63,14 @@ const IconButton = ({
     return (
       <button
         onClick={onClick}
-        style={{ backgroundColor: "white", borderStyle: "hidden" }}
+        style={{
+          backgroundColor: "white",
+          borderStyle: "hidden",
+          borderRadius: "2rem",
+          height: fontSize,
+          width: fontSize,
+          padding: "0.35rem",
+        }}
       >
         <span
           className="material-symbols-outlined"

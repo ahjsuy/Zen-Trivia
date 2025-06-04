@@ -60,12 +60,10 @@ const SinglePlayer = () => {
   });
   const [playMusic, setPlayMusic] = useState<number>(1);
   const [timerDuration, setTimerDuration] = useState<number>(15);
-  const [timerLength, setTimerLength] = useState<number>(15);
   const [correctIsSelected, setCorrectIsSelected] = useState<boolean>(false);
   const [roundComplete, setRoundComplete] = useState<boolean>(false);
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [showPoints, setShowPoints] = useState<number[]>([0, 0]);
-  const [roundId, setRoundId] = useState<number>(0);
 
   let queryURL = "https://the-trivia-api.com/v2/questions?limit=10";
 

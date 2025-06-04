@@ -93,6 +93,7 @@ const AnswerList = ({
         {choiceObjects?.map((item, index) => (
           <li
             className={item.className}
+            key={index}
             onClick={() => {
               let newState = choiceObjects.map((c, i) => {
                 if (index == i) {

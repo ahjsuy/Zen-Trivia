@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import { useSocket } from "../SocketContext";
+import Leaderboard from "./Leaderboard";
 
 interface Props {
   user: { role: string; username: string; icon: string; roomName: string };
@@ -9,6 +10,7 @@ interface Props {
 type Message = {
   senderID: string;
   message: string;
+  icon: string;
 };
 
 const Chat = ({ user }: Props) => {
@@ -20,9 +22,11 @@ const Chat = ({ user }: Props) => {
 
   useEffect(() => {
     if (socket) {
-      const handleMessage = (msg: string, socketID: string) => {
+      const handleMessage = (msg: string, socketID: string, icon: string) => {
+        console.log("Message received, " + msg);
+
         setMessages((prevMessages) => [
-          { senderID: socketID, message: msg },
+          { senderID: socketID, message: msg, icon: icon },
           ...prevMessages,
         ]);
       };
@@ -38,7 +42,13 @@ const Chat = ({ user }: Props) => {
   const handleFormSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (socket) {
-      socket.emit("sendMessage", message, user.username, user.roomName);
+      console.log(user.icon);
+      socket.emit("sendMessage", {
+        message,
+        username: user.username,
+        roomName: user.roomName,
+        icon: user.icon,
+      });
     }
     setMessage("");
   };
@@ -48,12 +58,19 @@ const Chat = ({ user }: Props) => {
       className="flex-column"
       style={{
         height: "100%",
+        width: "100%",
         textAlign: "center",
         color: "black",
-        backgroundColor: "white",
-        width: "100%",
+        backgroundColor: "rgb(255,255,255, .5)",
+        boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+        border: "1px solid rgba(255, 255, 255, 0.3)",
+        borderTop: "none",
+        marginLeft: "auto",
       }}
     >
+      <div>
+        <Leaderboard />
+      </div>
       <div
         style={{
           overflowY: "auto",
@@ -65,9 +82,26 @@ const Chat = ({ user }: Props) => {
       >
         {messages.length > 0 ? (
           messages.map((msg, index) => (
-            <p key={index}>
-              {msg.senderID}: {msg.message}
-            </p>
+            <div className="flex flex-row" style={{ padding: "0.51rem" }}>
+              <span
+                className="material-symbols-outlined"
+                style={{
+                  fontSize: "3rem",
+                  backgroundColor: "white",
+                  borderRadius: "1rem",
+                  marginBottom: "auto",
+                  marginRight: ".5rem",
+                }}
+              >
+                {msg.icon}
+              </span>
+              <p
+                key={index}
+                style={{ justifySelf: "start", textAlign: "start" }}
+              >
+                <b>{msg.senderID}</b>: {msg.message}
+              </p>
+            </div>
           ))
         ) : (
           <p>No messages</p>
@@ -95,14 +129,21 @@ const Chat = ({ user }: Props) => {
               id="messageBox"
               aria-describedby="message"
               placeholder="Message"
+              autoComplete="off"
               onChange={(e) => setMessage(e.target.value)}
               value={message}
+              style={{ height: "100%", minWidth: "70%" }}
             />
           </div>
           <button
             type="button"
-            className="btn btn-light roboto-slab-default"
+            className="roboto-slab-default no-hover"
             onClick={handleFormSubmit}
+            style={{
+              padding: "0 0rem 0 0rem",
+              fontSize: "1rem",
+              maxWidth: "30%",
+            }}
           >
             Send Message
           </button>

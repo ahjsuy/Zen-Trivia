@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useSocket } from "../../../SocketContext";
 import { useUser } from "../../../UserContext";
 import Alert from "../../../components/Alert";
-import Navbar from "../../../components/navbar";
+
 const saveToSessionStorage = (key: string, value: object) => {
   sessionStorage.setItem(key, JSON.stringify(value));
 };
@@ -12,10 +12,10 @@ const saveToSessionStorage = (key: string, value: object) => {
 const Login = () => {
   const socket = useSocket();
   const { user, setUser } = useUser();
-  const [username, setUsername] = useState<string>(user.username);
-  const [selectedIcon, setSelectedIcon] = useState<string>(user.icon);
-  const [roomName, setRoomName] = useState<string>(user.roomName);
-  const [alertStatus, setAlertStatus] = useState<boolean>(false);
+  const [username, setUsername] = useState(user.username);
+  const [selectedIcon, setSelectedIcon] = useState("user.icon");
+  const [roomName, setRoomName] = useState(user.roomName);
+  const [alertStatus, setAlertStatus] = useState(false);
 
   const navigate = useNavigate();
 
@@ -35,31 +35,15 @@ const Login = () => {
   }, [roomName]);
 
   useEffect(() => {
-    if (!socket) return;
-
-    const handleCurrentRoom = (roomName: string) => {
-      if (roomName != "invalid") {
-        setRoomName(roomName);
-      } else {
-        setAlertStatus(true);
-      }
-    };
-
-    socket.on("currentRoom", handleCurrentRoom);
-
-    return () => {
-      socket.off("currentRoom", handleCurrentRoom);
-    };
-
-    // if (socket) {
-    //   socket.on("currentRoom", (roomName) => {
-    //     if (roomName != "invalid") {
-    //       setRoomName(roomName);
-    //     } else {
-    //       setAlertStatus(true);
-    //     }
-    //   });
-    // }
+    if (socket) {
+      socket.on("currentRoom", (roomName) => {
+        if (roomName != "invalid") {
+          setRoomName(roomName);
+        } else {
+          setAlertStatus(true);
+        }
+      });
+    }
   }, [socket]);
 
   const handleFormSubmit = (event: React.FormEvent) => {
@@ -82,33 +66,29 @@ const Login = () => {
 
   return (
     <div className="grad flex-column">
-      <Navbar />
       {alertStatus && (
         <Alert text="The room you tried to join does not exist!"></Alert>
       )}
       <div
-        className="center"
         style={{
-          backgroundColor: "rgb(255,255,255, .5)",
+          backgroundColor: "white",
           borderRadius: "10px",
-          margin: "auto",
-          placeContent: "center",
-          padding: "5rem",
-          boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-          backdropFilter: "blur(5px)",
-          border: "1px solid rgba(255, 255, 255, 0.3)",
+          position: "absolute",
+          top: "25%",
+          left: "37.5%",
+          width: "25%",
+          padding: "50px",
         }}
       >
         <form
           style={{ textAlign: "center", width: "100%" }}
           onSubmit={handleFormSubmit}
         >
-          <div className="form-group center">
-            <label htmlFor="username" style={{ marginBottom: "1rem" }}>
+          <div className="form-group">
+            <label htmlFor="username" style={{ marginBottom: "5px" }}>
               Enter your username
             </label>
             <input
-              style={{ width: "75%" }}
               type="text"
               className="form-control"
               id="username"
@@ -121,32 +101,53 @@ const Login = () => {
             />
           </div>
         </form>
-        <div className="flex-column" style={{ padding: "1rem 0 1rem 0" }}>
-          <label htmlFor="icon" style={{ marginBottom: "1rem" }}>
-            Choose your icon
-          </label>
-          <div className="flex-row" style={{ flexWrap: "wrap", gap: "1rem" }}>
-            {[
-              "favorite",
-              "grade",
-              "cruelty_free",
-              "owl",
-              "sound_detection_dog_barking",
-              "nightlight",
-            ].map((icon) => (
-              <IconButton
-                name={icon}
-                fontSize={"3.5rem"}
-                selected={selectedIcon}
-                setSelected={setSelectedIcon}
-              />
-            ))}
+        <div className="flex-column">
+          <div>Choose your icon</div>
+          <div className="flex-row" style={{ flexWrap: "wrap" }}>
+            <IconButton
+              name="favorite"
+              fontSize={32}
+              selected={selectedIcon}
+              setSelected={setSelectedIcon}
+            />
+            <IconButton
+              name="grade"
+              fontSize={32}
+              selected={selectedIcon}
+              setSelected={setSelectedIcon}
+            />
+            <IconButton
+              name="cruelty_free"
+              fontSize={32}
+              selected={selectedIcon}
+              setSelected={setSelectedIcon}
+            />
+            <IconButton
+              name="owl"
+              fontSize={32}
+              selected={selectedIcon}
+              setSelected={setSelectedIcon}
+            />
+            <IconButton
+              name="sound_detection_dog_barking"
+              fontSize={32}
+              selected={selectedIcon}
+              setSelected={setSelectedIcon}
+            />
+            <IconButton
+              name="nightlight"
+              fontSize={32}
+              selected={selectedIcon}
+              setSelected={setSelectedIcon}
+            />
           </div>
         </div>
-        <div className="flex-row" style={{ gap: "5rem" }}>
+        <div className="flex-row" style={{ gap: "10px" }}>
           <div
             style={{
               width: "50%",
+              placeContent: "left",
+              textAlign: "left",
               borderRight: "solid",
               borderColor: "lightGray",
               borderWidth: "2px",
@@ -154,11 +155,10 @@ const Login = () => {
             }}
           >
             <form
-              className="center"
               style={{ textAlign: "left", width: "100%", placeContent: "left" }}
               onSubmit={handleFormSubmit}
             >
-              <div className="form-group center">
+              <div className="form-group">
                 <label htmlFor="roomName" style={{ marginBottom: "5px" }}>
                   Join a room
                 </label>
@@ -173,7 +173,6 @@ const Login = () => {
                   }
                   value={user.roomName}
                   maxLength={4}
-                  style={{ maxWidth: "50%" }}
                 />
                 <small id="roomCodeHelp" className="form-text text-muted">
                   Enter the four letter room code
@@ -182,36 +181,22 @@ const Login = () => {
               <button
                 onClick={handleJoinRoom}
                 style={{
-                  padding: "0.75rem 1.25rem .75rem 1.25rem",
-                  backgroundColor: "rgb(0, 119, 182, 1)",
-                  color: "white",
-                  borderRadius: ".75rem",
-                  boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-                  backdropFilter: "blur(5px)",
-                  border: "1px solid rgba(255, 255, 255, 0.3)",
+                  paddingRight: "10px",
+                  paddingLeft: "10px",
+                  marginTop: "10px",
                 }}
               >
                 Join
               </button>
             </form>
           </div>
-          <div
-            className="flex-column center"
-            style={{ margin: "auto", gap: "1rem" }}
-          >
-            <label htmlFor="createButton" style={{ marginBottom: "5px" }}>
-              Create a room
-            </label>{" "}
+          <div className="flex-column">
+            <div>Create a room</div>
             <button
-              id="createButton"
               style={{
-                padding: "0.75rem 1.25rem .75rem 1.25rem",
-                backgroundColor: "rgb(0, 119, 182, 1)",
-                color: "white",
-                borderRadius: ".75rem",
-                boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-                backdropFilter: "blur(5px)",
-                border: "1px solid rgba(255, 255, 255, 0.3)",
+                paddingRight: "10px",
+                paddingLeft: "10px",
+                marginTop: "10px",
               }}
               onClick={handleCreateRoom}
             >

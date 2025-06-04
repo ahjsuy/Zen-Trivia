@@ -44,9 +44,9 @@ function App() {
               picture="groups"
               title="Multiplayer"
               description="Under revision. Come back soon!"
-              link=""
+              link="/multiplayer/game/Login"
             />{" "}
-            <div
+            {/* <div
               style={{
                 position: "absolute",
                 top: 0,
@@ -57,7 +57,7 @@ function App() {
                 zIndex: 2,
                 borderRadius: "2vw",
               }}
-            />
+            /> */}
           </div>
         </div>
       </div>

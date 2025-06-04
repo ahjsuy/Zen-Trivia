@@ -1,6 +1,8 @@
 import express, { Request, Response } from "express";
 import http from "http";
 import { Server } from "socket.io";
+import { categoriesList, difficultiesList } from "../../../types";
+import { LargeNumberLike } from "crypto";
 
 const app = express();
 const server = http.createServer(app);
@@ -11,7 +13,9 @@ const io = new Server(server, {
   },
 });
 const PORT = 4000;
-const roomsList = new Map<string, {}>();
+// roomname, list of users
+
+const roomsList = new Map<string, string[]>();
 
 let queryURL = "https://the-trivia-api.com/v2/questions?limit=1";
 
@@ -27,23 +31,26 @@ const getRoomName = () => {
 io.on("connection", (socket) => {
   console.log(`a user ${socket.id} connected`);
 
-  socket.on("sendMessage", (message, username, roomName) => {
-    console.log(message, username);
-    io.to(roomName).emit("message", message, username);
+  socket.on("sendMessage", ({ message, username, roomName, icon }) => {
+    console.log(message, username, icon);
+    io.to(roomName).emit("message", message, username, icon);
   });
 
-  socket.on("requestNew", async (queryURL, room) => {
-    try {
-      const response = await fetch(queryURL);
-      const responseJSON = await response.json();
-      io.to(room).emit("responseQuestion", responseJSON);
-      console.log("sent new question to ", room);
-    } catch (error) {
-      console.error("Error fetching problem:", error);
+  socket.on(
+    "requestNew",
+    async ({ queryURL, room }: { queryURL: string; room: string }) => {
+      try {
+        const response = await fetch(queryURL);
+        const responseJSON = await response.json();
+        io.to(room).emit("responseQuestion", responseJSON);
+        console.log("sent new question to ", room);
+      } catch (error) {
+        console.error("Error fetching problem:", error);
+      }
     }
-  });
+  );
 
-  socket.on("roomCreate", (username) => {
+  socket.on("roomCreate", (username: string) => {
     const rooms = Array.from(io.sockets.adapter.rooms.keys());
     const activeRooms = rooms.filter((room) => !io.sockets.sockets.has(room));
     let newRoom = getRoomName();
@@ -54,7 +61,7 @@ io.on("connection", (socket) => {
 
     console.log(`${socket.id} joined `, newRoom);
     socket.join(newRoom);
-    roomsList.set(newRoom, { [username]: 0 });
+    roomsList.set(newRoom, [username]);
     io.to(socket.id).emit("currentRoom", newRoom);
   });
 
@@ -62,7 +69,7 @@ io.on("connection", (socket) => {
     if (io.sockets.adapter.rooms.has(room)) {
       socket.join(room);
       io.to(socket.id).emit("currentRoom", room);
-      roomsList.set(room, { ...roomsList.get(room), [username]: 0 });
+      roomsList.set(room, [...(roomsList.get(room) || []), username]);
     } else {
       io.to(socket.id).emit("currentRoom", "invalid");
     }
@@ -73,17 +80,58 @@ io.on("connection", (socket) => {
     console.log("sent usersList ", roomsList.get(room));
   });
 
-  socket.on("updatePoints", (room, username, points, pointsToWin) => {
-    console.log(`${username} now has ${points} points`);
-    io.to(room).emit("pointsUpdate", username, points);
-    if (points >= pointsToWin) {
-      io.to(room).emit("gameWon", username);
-      console.log("GAME WON");
+  socket.on(
+    "updatePoints",
+    ({
+      room,
+      username,
+      points,
+    }: {
+      room: string;
+      username: string;
+      points: number;
+    }) => {
+      console.log(`${username} now has ${points} points`);
+      io.to(room).emit("pointsUpdate", username, points);
     }
-  });
+  );
 
-  socket.on("startGame", (room, time) => {
-    io.to(room).emit("gameStart", time);
+  socket.on(
+    "gameWon",
+    ({ room, username }: { room: string; username: string }) => {
+      io.to(room).emit("gameOver", username);
+      console.log("game over");
+    }
+  );
+
+  socket.on(
+    "startGame",
+    ({
+      room,
+      url,
+      timer,
+      points,
+    }: {
+      room: string;
+      url: string;
+      timer: number;
+      points: number;
+    }) => {
+      console.log("Room " + room + " has started with query url " + url);
+      console.log(
+        "Max points is " + points + " and timer duration is " + timer
+      );
+      io.to(room).emit("gameStart", {
+        timer: timer,
+        points: points,
+        url: url,
+      });
+    }
+  );
+
+  socket.on("resetTimer", (room) => {
+    io.to(room).emit("timer");
+    console.log(room + " timer reset");
   });
 
   socket.on("disconnect", () => {
