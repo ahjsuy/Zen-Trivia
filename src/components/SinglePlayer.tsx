@@ -4,6 +4,7 @@ import MusicButton from "./MusicButton";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
 import AnswerList from "./AnswerList";
 import TriviaSettingsSinglePlayer from "./TriviaSettingsSinglePlayer";
+import Navbar from "./navbar";
 
 interface triviaQuestion {
   category: string;
@@ -138,20 +139,23 @@ const SinglePlayer = () => {
   }, [showSettings]);
 
   return (
-    <div className="grad">
+    <div className="grad flex-column" style={{ position: "relative" }}>
+      <Navbar />
       <ReactHowler
         src="/sounds/once-in-paris-168895.mp3"
         playing={playMusic != 0}
         volume={playMusic / 8}
         loop={true}
       />
-      <div style={{ position: "fixed", top: "0", left: "0", padding: "15px" }}>
+      <div
+        style={{ position: "fixed", top: "3.5rem", left: "0", padding: "15px" }}
+      >
         <MusicButton playMusic={playMusic} setPlayMusic={setPlayMusic} />
       </div>
       <div
         style={{
           position: "fixed",
-          top: "0",
+          top: "3.5rem",
           right: "0",
           padding: "15px",
           color: "white",
@@ -163,7 +167,7 @@ const SinglePlayer = () => {
       <div className="container">
         <div
           className="oswald-default"
-          style={{ fontSize: "3rem", color: "white" }}
+          style={{ fontSize: "3rem", color: "white", margin: "0" }}
         >
           <CountdownCircleTimer
             key={timerDuration}
@@ -176,8 +180,9 @@ const SinglePlayer = () => {
               timerDuration / 2,
               0,
             ]}
-            strokeWidth={20}
-            trailStrokeWidth={19}
+            size={150}
+            strokeWidth={18}
+            trailStrokeWidth={18}
             onComplete={() => {
               setRoundComplete(true);
 
@@ -200,12 +205,12 @@ const SinglePlayer = () => {
         <div
           className="oswald-default"
           style={{
-            fontSize: "5rem",
+            fontSize: "2.5rem",
             padding: "0.5rem",
-            paddingTop: "3rem",
-            paddingBottom: "3rem",
             textAlign: "center",
             color: "white",
+            margin: "8vh",
+            maxHeight: "10vh",
           }}
         >
           {questionBank[0]?.question.text ?? ""}
@@ -230,6 +235,7 @@ const SinglePlayer = () => {
           <div
             style={{
               position: "absolute",
+
               top: "0",
               left: "0",
               width: "100%",
@@ -254,6 +260,7 @@ const SinglePlayer = () => {
         )}
 
         <button
+          style={{ margin: "2rem" }}
           type="button"
           className="btn btn-light roboto-slab-default box-shadow"
           onClick={() => {

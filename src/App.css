@@ -13,7 +13,8 @@
   align-items: center;
   justify-content: center;
   width: 75vw;
-  margin: 20px;
+  height: 100%;
+  margin: auto;
 }
 
 html,
@@ -30,6 +31,12 @@ body {
   box-sizing: inherit;
   padding: 0;
   margin: 0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 .app {

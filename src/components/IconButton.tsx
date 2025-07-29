@@ -22,15 +22,15 @@ const IconButton = ({
               border: "1",
               borderStyle: "solid",
               borderColor: "gray",
-              borderRadius: "2rem",
-              height: fontSize,
-              width: fontSize,
+              borderRadius: "50%",
+              height: `${fontSize + 0.25}rem`,
+              width: `${fontSize + 0.25}rem`,
               padding: "0.35rem",
             }}
           >
             <span
               className="material-symbols-outlined"
-              style={{ fontSize: fontSize }}
+              style={{ fontSize: fontSize, margin: "auto" }}
             >
               {name}
             </span>
@@ -43,15 +43,15 @@ const IconButton = ({
             style={{
               backgroundColor: "white",
               borderStyle: "hidden",
-              borderRadius: "2rem",
-              height: fontSize,
-              width: fontSize,
+              borderRadius: "50%",
+              height: `${fontSize + 0.25}rem`,
+              width: `${fontSize + 0.25}rem`,
               padding: "0.35rem",
             }}
           >
             <span
               className="material-symbols-outlined"
-              style={{ fontSize: fontSize }}
+              style={{ fontSize: fontSize, margin: "auto" }}
             >
               {name}
             </span>
@@ -66,15 +66,15 @@ const IconButton = ({
         style={{
           backgroundColor: "white",
           borderStyle: "hidden",
-          borderRadius: "2rem",
-          height: fontSize,
-          width: fontSize,
+          borderRadius: "50%",
+          height: `${fontSize + 0.25}rem`,
+          width: `${fontSize + 0.25}rem`,
           padding: "0.35rem",
         }}
       >
         <span
           className="material-symbols-outlined"
-          style={{ fontSize: fontSize }}
+          style={{ fontSize: fontSize, margin: "auto" }}
         >
           {name}
         </span>

@@ -1,8 +1,13 @@
 import express, { Request, Response } from "express";
 import http from "http";
 import { Server } from "socket.io";
-import { categoriesList, difficultiesList } from "../../../types";
-import { LargeNumberLike } from "crypto";
+import { Socket } from "socket.io-client";
+
+type userInfoType = {
+  username: string;
+  role: "leader" | "player";
+  socketID: string;
+};
 
 const app = express();
 const server = http.createServer(app);
@@ -13,9 +18,15 @@ const io = new Server(server, {
   },
 });
 const PORT = 4000;
-// roomname, list of users
-
-const roomsList = new Map<string, string[]>();
+const roomsList = new Map<string, userInfoType[]>();
+const roomTimers = new Map<
+  string,
+  {
+    interval: NodeJS.Timeout;
+    startTime: number;
+    duration: number;
+  }
+>();
 
 let queryURL = "https://the-trivia-api.com/v2/questions?limit=1";
 
@@ -31,14 +42,28 @@ const getRoomName = () => {
 io.on("connection", (socket) => {
   console.log(`a user ${socket.id} connected`);
 
-  socket.on("sendMessage", ({ message, username, roomName, icon }) => {
-    console.log(message, username, icon);
-    io.to(roomName).emit("message", message, username, icon);
-  });
+  socket.on(
+    "sendMessage",
+    ({
+      message,
+      username,
+      roomName,
+      icon,
+    }: {
+      message: string;
+      username: string;
+      roomName: string;
+      icon: string;
+    }) => {
+      console.log(message, username);
+      io.to(roomName).emit("message", message, username, icon);
+    }
+  );
 
   socket.on(
     "requestNew",
     async ({ queryURL, room }: { queryURL: string; room: string }) => {
+      console.log("Requesting new questions with url: ", queryURL);
       try {
         const response = await fetch(queryURL);
         const responseJSON = await response.json();
@@ -50,7 +75,7 @@ io.on("connection", (socket) => {
     }
   );
 
-  socket.on("roomCreate", (username: string) => {
+  socket.on("roomCreate", (username) => {
     const rooms = Array.from(io.sockets.adapter.rooms.keys());
     const activeRooms = rooms.filter((room) => !io.sockets.sockets.has(room));
     let newRoom = getRoomName();
@@ -61,7 +86,13 @@ io.on("connection", (socket) => {
 
     console.log(`${socket.id} joined `, newRoom);
     socket.join(newRoom);
-    roomsList.set(newRoom, [username]);
+    roomsList.set(newRoom, [
+      {
+        username: username,
+        role: "leader",
+        socketID: socket.id,
+      } as userInfoType,
+    ]);
     io.to(socket.id).emit("currentRoom", newRoom);
   });
 
@@ -69,7 +100,14 @@ io.on("connection", (socket) => {
     if (io.sockets.adapter.rooms.has(room)) {
       socket.join(room);
       io.to(socket.id).emit("currentRoom", room);
-      roomsList.set(room, [...(roomsList.get(room) || []), username]);
+      roomsList.set(room, [
+        ...(roomsList.get(room) ?? []),
+        {
+          username: username,
+          role: "player",
+          socketID: socket.id,
+        } as userInfoType,
+      ]);
     } else {
       io.to(socket.id).emit("currentRoom", "invalid");
     }
@@ -86,21 +124,19 @@ io.on("connection", (socket) => {
       room,
       username,
       points,
+      pointsToWin,
     }: {
       room: string;
       username: string;
       points: number;
+      pointsToWin: number;
     }) => {
       console.log(`${username} now has ${points} points`);
       io.to(room).emit("pointsUpdate", username, points);
-    }
-  );
-
-  socket.on(
-    "gameWon",
-    ({ room, username }: { room: string; username: string }) => {
-      io.to(room).emit("gameOver", username);
-      console.log("game over");
+      if (points >= pointsToWin) {
+        io.to(room).emit("gameOver", username);
+        console.log("GAME WON");
+      }
     }
   );
 
@@ -117,24 +153,67 @@ io.on("connection", (socket) => {
       timer: number;
       points: number;
     }) => {
-      console.log("Room " + room + " has started with query url " + url);
       console.log(
-        "Max points is " + points + " and timer duration is " + timer
+        `${room} requested to start timer with duration ${timer} and points ${points} with url ${url}`
       );
-      io.to(room).emit("gameStart", {
-        timer: timer,
-        points: points,
-        url: url,
-      });
+      io.to(room).emit("gameStart", { timer: timer, points: points, url: url });
+      const duration = timer * 1000;
+
+      function startRound() {
+        const startTime = Date.now() + 2000;
+        if (roomTimers.has(room)) clearInterval(roomTimers.get(room)!.interval);
+
+        const interval = setInterval(() => {
+          const now = Date.now();
+          const elapsed = now - startTime;
+          const remaining = Math.max(
+            0,
+            Math.floor((duration - elapsed) / 1000)
+          );
+
+          io.to(room).emit("timerTick", remaining);
+
+          if (remaining <= 0) {
+            io.to(room).emit("timerEnd");
+            clearInterval(interval);
+            setTimeout(() => {
+              io.to(room).emit("timerStart", startTime, timer);
+              startRound();
+            }, 3000);
+          }
+        }, 1000);
+        roomTimers.set(room, {
+          interval: interval,
+          startTime: startTime,
+          duration: duration,
+        });
+      }
+      startRound();
     }
   );
 
-  socket.on("resetTimer", (room) => {
-    io.to(room).emit("timer");
-    console.log(room + " timer reset");
-  });
-
   socket.on("disconnect", () => {
+    for (const [roomName, room] of roomsList) {
+      for (const user of room) {
+        if (user.socketID == socket.id) {
+          // remove the user from the room
+          // if the leader disconnected, choose a new leader
+          const disconnectedUser: userInfoType = room.splice(
+            room.indexOf(user),
+            1
+          )[0];
+
+          if (disconnectedUser.role === "leader" && room.length > 0) {
+            io.to(roomName).emit("newLeader", { socketID: room[0].socketID });
+            console.log("choosing ", room[0].socketID, " as leader");
+          } else if (room.length <= 0) {
+            roomsList.delete(roomName);
+          }
+          io.to(roomName).emit("disconnectedUser", user.username);
+          return;
+        }
+      }
+    }
     console.log("a user disconnected");
   });
 });

@@ -3,27 +3,33 @@ import GamemodeCard from "./components/GamemodeCard";
 
 function App() {
   return (
-    <div className="grad flex-column" style={{ gap: "15vh" }}>
+    <div className="grad flex-column" style={{}}>
       <div
-        className="container oswald-default text-shadow "
+        className="oswald-default text-shadow "
         style={{
-          fontSize: "15vh",
+          fontSize: "9rem",
           color: "white",
           display: "flex",
           flexDirection: "row",
           gap: "1%",
+          margin: "auto",
+          minWidth: "90%",
         }}
       >
-        <i className="material-symbols-outlined" style={{ fontSize: "18vh" }}>
-          spa
-        </i>
-        ZEN TRIVIA
+        <div className="" style={{ margin: "auto" }}>
+          <i className="material-symbols-outlined" style={{ fontSize: "18vh" }}>
+            spa
+          </i>
+          ZEN TRIVIA
+        </div>
       </div>
       <div
         className="flex-column"
         style={{
           alignItems: "center",
           gap: "1em",
+          margin: "auto",
+          marginTop: "5vh",
         }}
       >
         <div className="flex-row" style={{ gap: "1em", maxWidth: "75vw" }}>
@@ -43,21 +49,9 @@ function App() {
             <GamemodeCard
               picture="groups"
               title="Multiplayer"
-              description="Under revision. Come back soon!"
+              description="Play with your friends!"
               link="/multiplayer/game/Login"
             />{" "}
-            {/* <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                backgroundColor: "rgba(128, 128, 128, 0.7)", // semi-transparent gray
-                zIndex: 2,
-                borderRadius: "2vw",
-              }}
-            /> */}
           </div>
         </div>
       </div>

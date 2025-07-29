@@ -87,6 +87,7 @@ const TriviaSettingsMultiplayer = ({ roomCode }: Props) => {
         queryURL += "&difficulties=";
         queryURL += difficultiesUrl.join(",");
       }
+      console.log("starting game\n");
       socket?.emit("startGame", {
         room: user.roomName,
         url: queryURL,
@@ -125,7 +126,8 @@ const TriviaSettingsMultiplayer = ({ roomCode }: Props) => {
         margin: "auto",
         padding: "3rem",
         textAlign: "left",
-        maxWidth: "40%",
+        maxWidth: "60%",
+        overflow: "auto",
       }}
     >
       <div style={{ margin: "auto" }}>

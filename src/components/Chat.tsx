@@ -5,6 +5,7 @@ import Leaderboard from "./Leaderboard";
 
 interface Props {
   user: { role: string; username: string; icon: string; roomName: string };
+  showSettings: boolean;
 }
 
 type Message = {
@@ -22,19 +23,28 @@ const Chat = ({ user }: Props) => {
 
   useEffect(() => {
     if (socket) {
-      const handleMessage = (msg: string, socketID: string, icon: string) => {
+      const handleMessage = (msg: string, username: string, icon: string) => {
         console.log("Message received, " + msg);
 
         setMessages((prevMessages) => [
-          { senderID: socketID, message: msg, icon: icon },
+          { senderID: username, message: msg, icon: icon },
           ...prevMessages,
         ]);
       };
 
+      const handleDisconnect = (username: string) => {
+        setMessages((prev) => [
+          { senderID: "server", message: `${username} disconnected`, icon: "" },
+          ...prev,
+        ]);
+      };
+
       socket.on("message", handleMessage);
+      socket.on("disconnectedUser", handleDisconnect);
 
       return () => {
         socket.off("message", handleMessage);
+        socket.off("disconnectedUser", handleDisconnect);
       };
     }
   }, [socket]);
@@ -57,7 +67,7 @@ const Chat = ({ user }: Props) => {
     <div
       className="flex-column"
       style={{
-        height: "100%",
+        height: "99.9%",
         width: "100%",
         textAlign: "center",
         color: "black",
@@ -68,9 +78,8 @@ const Chat = ({ user }: Props) => {
         marginLeft: "auto",
       }}
     >
-      <div>
-        <Leaderboard />
-      </div>
+      <Leaderboard />
+
       <div
         style={{
           overflowY: "auto",
@@ -86,9 +95,9 @@ const Chat = ({ user }: Props) => {
               <span
                 className="material-symbols-outlined"
                 style={{
-                  fontSize: "3rem",
+                  fontSize: "2rem",
                   backgroundColor: "white",
-                  borderRadius: "1rem",
+                  borderRadius: "50%",
                   marginBottom: "auto",
                   marginRight: ".5rem",
                 }}
@@ -97,7 +106,11 @@ const Chat = ({ user }: Props) => {
               </span>
               <p
                 key={index}
-                style={{ justifySelf: "start", textAlign: "start" }}
+                style={{
+                  justifySelf: "start",
+                  textAlign: "start",
+                  marginTop: "auto",
+                }}
               >
                 <b>{msg.senderID}</b>: {msg.message}
               </p>
@@ -140,12 +153,13 @@ const Chat = ({ user }: Props) => {
             className="roboto-slab-default no-hover"
             onClick={handleFormSubmit}
             style={{
-              padding: "0 0rem 0 0rem",
-              fontSize: "1rem",
+              padding: "5px",
+              fontSize: ".75rem",
               maxWidth: "30%",
+              border: "none",
             }}
           >
-            Send Message
+            Send
           </button>
         </form>
       </div>

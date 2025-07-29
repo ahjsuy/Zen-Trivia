@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, ReactEventHandler } from "react";
 import IconButton from "../../../components/IconButton";
 import { useNavigate } from "react-router-dom";
 import { useSocket } from "../../../SocketContext";
@@ -12,10 +12,13 @@ const saveToSessionStorage = (key: string, value: object) => {
 const Login = () => {
   const socket = useSocket();
   const { user, setUser } = useUser();
-  const [username, setUsername] = useState<string>(user.username);
-  const [selectedIcon, setSelectedIcon] = useState<string>(user.icon);
+  const [username, setUsername] = useState<string>(user.username ?? "");
+  const [selectedIcon, setSelectedIcon] = useState<string>(user.icon ?? "");
   const [roomName, setRoomName] = useState<string>(user.roomName);
   const [alertStatus, setAlertStatus] = useState<boolean>(false);
+  const [missingUsername, setMissingUsername] = useState<boolean>(false);
+  const [missingRoomName, setMissingRoomName] = useState<boolean>(false);
+  const [missingIcon, setMissingIcon] = useState<boolean>(false);
 
   const navigate = useNavigate();
 
@@ -41,7 +44,7 @@ const Login = () => {
       if (roomName != "invalid") {
         setRoomName(roomName);
       } else {
-        setAlertStatus(true);
+        setMissingRoomName(true);
       }
     };
 
@@ -50,30 +53,33 @@ const Login = () => {
     return () => {
       socket.off("currentRoom", handleCurrentRoom);
     };
-
-    // if (socket) {
-    //   socket.on("currentRoom", (roomName) => {
-    //     if (roomName != "invalid") {
-    //       setRoomName(roomName);
-    //     } else {
-    //       setAlertStatus(true);
-    //     }
-    //   });
-    // }
   }, [socket]);
 
   const handleFormSubmit = (event: React.FormEvent) => {
     event.preventDefault();
   };
 
-  const handleCreateRoom = () => {
-    if (socket) {
+  const handleCreateRoom = (e: React.FormEvent<HTMLButtonElement>) => {
+    if (username === "") {
+      setMissingUsername(true);
+    } else {
+      setMissingUsername(false);
+    }
+    if (selectedIcon === "") {
+      setMissingIcon(true);
+    } else {
+      setMissingIcon(false);
+    }
+    if (username !== "" && selectedIcon !== "" && socket) {
       setUser((prev) => ({ ...prev, role: "leader" }));
       socket.emit("roomCreate", username);
     }
   };
 
   const handleJoinRoom = (event: React.MouseEvent<HTMLButtonElement>) => {
+    if (username === "") {
+      setMissingUsername(true);
+    }
     if (socket) {
       socket.emit("roomJoin", user.roomName, user.username);
       setUser((prev) => ({ ...prev, role: "player" }));
@@ -83,9 +89,9 @@ const Login = () => {
   return (
     <div className="grad flex-column">
       <Navbar />
-      {alertStatus && (
+      {/* {alertStatus && (
         <Alert text="The room you tried to join does not exist!"></Alert>
-      )}
+      )} */}
       <div
         className="center"
         style={{
@@ -119,6 +125,9 @@ const Login = () => {
               }}
               value={username}
             />
+            {missingUsername && (
+              <div style={{ color: "red" }}>Please enter a username!</div>
+            )}
           </div>
         </form>
         <div className="flex-column" style={{ padding: "1rem 0 1rem 0" }}>
@@ -142,15 +151,18 @@ const Login = () => {
               />
             ))}
           </div>
+          {missingIcon && (
+            <div style={{ color: "red" }}>Please choose an icon!</div>
+          )}
         </div>
-        <div className="flex-row" style={{ gap: "5rem" }}>
+        <div className="flex-row" style={{ width: "95%" }}>
           <div
             style={{
               width: "50%",
               borderRight: "solid",
               borderColor: "lightGray",
               borderWidth: "2px",
-              padding: "5px",
+              padding: "0.5rem",
             }}
           >
             <form
@@ -178,17 +190,27 @@ const Login = () => {
                 <small id="roomCodeHelp" className="form-text text-muted">
                   Enter the four letter room code
                 </small>
+                {missingRoomName && (
+                  <div style={{ color: "red" }}>
+                    {" "}
+                    Please enter a valid room code!
+                  </div>
+                )}
               </div>
               <button
                 onClick={handleJoinRoom}
                 style={{
-                  padding: "0.75rem 1.25rem .75rem 1.25rem",
+                  display: "flex",
+                  width: "90%",
+                  padding: "0.75rem",
                   backgroundColor: "rgb(0, 119, 182, 1)",
                   color: "white",
                   borderRadius: ".75rem",
                   boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
                   backdropFilter: "blur(5px)",
                   border: "1px solid rgba(255, 255, 255, 0.3)",
+                  placeContent: "center",
+                  margin: "0.5rem",
                 }}
               >
                 Join
@@ -197,26 +219,37 @@ const Login = () => {
           </div>
           <div
             className="flex-column center"
-            style={{ margin: "auto", gap: "1rem" }}
+            style={{
+              width: "50%",
+              gap: "1rem",
+              padding: "0.5rem",
+              placeContent: "end",
+            }}
           >
-            <label htmlFor="createButton" style={{ marginBottom: "5px" }}>
-              Create a room
-            </label>{" "}
-            <button
-              id="createButton"
-              style={{
-                padding: "0.75rem 1.25rem .75rem 1.25rem",
-                backgroundColor: "rgb(0, 119, 182, 1)",
-                color: "white",
-                borderRadius: ".75rem",
-                boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-                backdropFilter: "blur(5px)",
-                border: "1px solid rgba(255, 255, 255, 0.3)",
-              }}
-              onClick={handleCreateRoom}
-            >
-              Create
-            </button>
+            <div style={{ width: "100%" }}>
+              <label htmlFor="createButton" style={{ marginBottom: "5px" }}>
+                Create a room
+              </label>{" "}
+              <button
+                id="createButton"
+                style={{
+                  display: "flex",
+                  width: "90%",
+                  padding: "0.75rem",
+                  backgroundColor: "rgb(0, 119, 182, 1)",
+                  color: "white",
+                  borderRadius: ".75rem",
+                  boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
+                  backdropFilter: "blur(5px)",
+                  border: "1px solid rgba(255, 255, 255, 0.3)",
+                  placeContent: "center",
+                  margin: "0.5rem",
+                }}
+                onClick={handleCreateRoom}
+              >
+                Create
+              </button>
+            </div>
           </div>
         </div>
       </div>

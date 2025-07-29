@@ -85,14 +85,15 @@ const AnswerList = ({
       <ul
         className="list-group"
         style={{
-          minWidth: "45vw",
+          width: "45vw",
           textAlign: "center",
-          fontSize: "1.75rem",
+          fontSize: "1rem",
         }}
       >
         {choiceObjects?.map((item, index) => (
           <li
             className={item.className}
+            style={{ width: "45vw" }}
             key={index}
             onClick={() => {
               let newState = choiceObjects.map((c, i) => {

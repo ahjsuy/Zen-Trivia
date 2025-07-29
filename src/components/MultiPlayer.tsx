@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import ReactHowler from "react-howler";
 import MusicButton from "./MusicButton";
 import { CountdownCircleTimer } from "react-countdown-circle-timer";
@@ -20,9 +20,14 @@ const MultiPlayer = ({ timerDuration, queryURL, pointsToWin }: Props) => {
   const [roundComplete, setRoundComplete] = useState<boolean>(false);
   const [timerKey, setTimerKey] = useState<number>(0);
   // const [timerDuration, setTimerDuration] = useState<number>(15);
-  const [points, setPoints] = useState<number>(0);
+  const [points, setPoints] = useState<number>(10);
+  const [test, setTest] = useState<boolean>(false);
   const { user } = useUser();
   const socket = useSocket();
+  const [remainingTime, setRemainingTime] = useState<number>(timerDuration);
+  const correctIsSelectedRef = useRef(correctIsSelected);
+  const pointsRef = useRef(points);
+
   // let timerDuration: number = 15;
   // let points = 0;
 
@@ -38,120 +43,112 @@ const MultiPlayer = ({ timerDuration, queryURL, pointsToWin }: Props) => {
   }, [questionBank]);
 
   useEffect(() => {
+    correctIsSelectedRef.current = correctIsSelected;
+  }, [correctIsSelected]);
+
+  useEffect(() => {
+    pointsRef.current = points;
+  }, [points]);
+
+  useEffect(() => {
     if (!socket) return;
-    socket.emit("clientReady");
-    console.log(user.roomName);
-    socket.onAny((event, ...args) => {
-      console.log(`🔔 Received event: ${event}`, args);
-    });
 
     const handleResponseQuestion = (res: triviaQuestion[]) => {
       setQuestionBank((prev) => [...prev, ...res]);
       console.log("New questions fetched");
     };
 
-    const handleTimerReset = (key: number) => {
-      setTimerKey((prev) => prev + 1);
+    const handleRoundStart = () => {
+      console.log("round started");
+      setQuestionBank((prev) => prev.slice(1));
+      setRoundComplete(false);
+      setCorrectIsSelected(false);
+      setTest(true);
+    };
+
+    const handleRoundEnd = () => {
+      setRoundComplete(true);
+      handleScores();
+      setTest(false);
+    };
+
+    const handleTimerTick = (time: number) => {
+      setRemainingTime(time);
+      // console.log("Timer Tick ", time);
     };
 
     socket.on("responseQuestion", handleResponseQuestion);
-    socket.on("timer", handleTimerReset);
+    socket.on("timerTick", handleTimerTick);
+    socket.on("timerStart", handleRoundStart);
+    socket.on("timerEnd", handleRoundEnd);
 
     return () => {
       socket.off("responseQuestion", handleResponseQuestion);
+      socket.off("timerTick", handleTimerTick);
+      socket.off("timerStart", handleRoundStart);
+      socket.off("timerEnd", handleRoundEnd);
     };
   }, [socket]);
 
   const handleScores = () => {
-    if (correctIsSelected) {
+    console.log("handlescores activated " + correctIsSelectedRef.current);
+    if (correctIsSelectedRef.current) {
+      setPoints((prev) => prev + 10);
       console.log(
         "updating points: ",
-        points + 10,
+        pointsRef.current,
         " compared to points to win ",
         pointsToWin
       );
-      setPoints((prev) => prev + 10);
+
       socket?.emit("updatePoints", {
         room: user.roomName,
         username: user.username,
-        points: points,
+        points: pointsRef.current,
+        pointsToWin: pointsToWin,
       });
-      if (points + 10 >= pointsToWin) {
-        socket?.emit("gameWon", {
-          room: user.roomName,
-          username: user.username,
-        });
-      }
     }
   };
 
   return (
-    <div className="" style={{ height: "100%" }}>
-      <ReactHowler
-        src="/sounds/once-in-paris-168895.mp3"
-        playing={playMusic != 0}
-        volume={playMusic / 8}
-        loop={true}
-      />
+    <div
+      className=""
+      style={{
+        display: "flex",
+        height: "100%",
+        width: "100%",
+        position: "relative",
+      }}
+    >
       <div
-        style={{ position: "relative", top: "0", left: "0", padding: "15px" }}
+        style={{ position: "absolute", top: "0", left: "0", padding: "15px" }}
       >
+        <ReactHowler
+          src="/sounds/once-in-paris-168895.mp3"
+          playing={playMusic != 0}
+          volume={playMusic / 8}
+          loop={true}
+        />
         <MusicButton playMusic={playMusic} setPlayMusic={setPlayMusic} />
       </div>
-      <div
-        style={{
-          position: "fixed",
-          top: "0",
-          right: "0",
-          padding: "15px",
-          color: "white",
-          fontSize: "1.5rem",
-        }}
-      ></div>
+
       <div className="container">
         <div
           className="oswald-default"
           style={{ fontSize: "3rem", color: "white" }}
         >
-          <CountdownCircleTimer
-            isPlaying={true}
-            key={timerKey}
-            duration={timerDuration}
-            colors={["#004777", "#F7B801", "#FFA500", "#A30000"]}
-            colorsTime={[
-              timerDuration,
-              timerDuration - timerDuration / 4,
-              timerDuration / 2,
-              0,
-            ]}
-            strokeWidth={20}
-            trailStrokeWidth={19}
-            onComplete={() => {
-              setRoundComplete(true);
-              handleScores();
-              setTimeout(() => {
-                setQuestionBank((prev) => prev.slice(1));
-                setRoundComplete(false);
-                setCorrectIsSelected(false);
-                if (user.role === "leader")
-                  socket?.emit("resetTimer", user.roomName);
-              }, 2750);
-
-              return { shouldRepeat: false, delay: 3 };
-            }}
-          >
-            {({ remainingTime }) => remainingTime}
-          </CountdownCircleTimer>
+          {remainingTime}
         </div>
         <div
           className="oswald-default"
           style={{
-            fontSize: "5rem",
+            fontSize: "2.5rem",
             padding: "0.5rem",
-            paddingTop: "3rem",
+            paddingTop: "2rem",
             paddingBottom: "3rem",
             textAlign: "center",
             color: "white",
+            minHeight: "8rem",
           }}
         >
           {questionBank[0]?.question.text ?? ""}
